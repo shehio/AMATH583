@@ -1,0 +1,22 @@
+1. What is the host name of the computer as reported by your linux environment? (You will need to find the right Linux command to execute for this. I suggest searching the web.)
+Using the command "hostname": shehios-MBP.
+
+2. How would you specify the name of an output file when you use the compiler if you wanted the executable to have a name other than a.out?
+Use the -o option for clang.
+
+3. What happens if you type $ a.out instead of $ ./a.out to run your program? What is the difference (operationally) between the two statements?
+It gives -bash: a,out: command not found. When you execute "a.out", the shell only looks for an executable "a.out" in all the directories that are added to the path. By default the current directory isn't added to the path. The path is a collection of directories where shell looks for executables. It will not be able to run it (unless you initially added that directory to the path in .bachrc -- for non-login shell or .bashprofile for login shell). When you execute "./a.out", you're specifying exactly where the executable is and the shell can locate it and run it.
+
+4. What does clang print when you run $ c++ --version?
+The output:
+Apple LLVM version 10.0.1 (clang-1001.0.46.4)
+Target: x86_64-apple-darwin18.7.0
+Thread model: posix
+InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+
+It prints the compiler's version, LLVM, being the backend and clan being the frontend.
+It prints the target of the compiler, since c++ is native the targets are specific and universal like java for example.
+It also print the thread model and where the compiler is installed.
+
+5. What do the -I and -l flags do in the command we used to build a.out? (AL: In case the fonts make the two flags look the same, one is lower-case “L” (ell) and one is upper-case “I” (eye).)
+From c++ --help, -I: Add the specified directory to the search path for include files. -l: Adds the name of the library that we would like to link to. From: https://stackoverflow.com/questions/519342/what-is-the-difference-between-i-and-l-in-makefile
