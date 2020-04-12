@@ -46,14 +46,16 @@ double inf_norm(const Vector& x) {
 }
 
 double dot(const Vector& x, const Vector& y) {
-  // WRITE ME
-
-  return /* FIX ME */ 0.0;
+  assert(x.num_rows() == y.num_rows());
+  auto sum = 0.0;
+  for (auto i = 0; i < x.num_rows(); ++i) {
+    sum += x(i) * y(i);
+  }
+  return sum;
 }
 
 double two_norm_d(const Vector& x) { 
-  // WRITE ME / FIX ME -- can you make the function only one line long including return?
-  return 0.0;  
+  return std::sqrt(dot(x, x));  
 }
 
 double one_norm(const Matrix& A) {

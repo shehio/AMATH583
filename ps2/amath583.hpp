@@ -20,8 +20,8 @@ double one_norm(const Vector& x);
 double two_norm(const Vector& x);
 double inf_norm(const Vector& x);
 
-// Also need to add dot()
-// and optionally two_norm_d()
+double dot(const Vector& x, const Vector& y);
+double two_norm_d(const Vector& x);
 
 
 double one_norm(const Matrix& x);
