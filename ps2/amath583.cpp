@@ -14,8 +14,11 @@
 #include <cmath>
 #include <cstddef>
 
-void zeroize(/* WRITE ME */) {
-  // WRITE ME
+void zeroize(Vector& x) {
+  for (auto i = 0; i < x.num_rows(); i++)
+  {
+    x(i) = 0;
+  }
 }
 
 double one_norm(const Vector& x) {
