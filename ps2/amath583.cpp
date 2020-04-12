@@ -22,21 +22,26 @@ void zeroize(Vector& x) {
 }
 
 double one_norm(const Vector& x) {
-  // WRITE ME
-  double sum = 0.0;
-
+  auto sum = 0.0;
+  for (auto i = 0; i < x.num_rows(); ++i) {
+    sum += std::abs(x(i));
+  }
   return sum;
 }
 
 double two_norm(const Vector& x) {
-  // WRITE ME
-  return /* FIX ME */ -1.0;
+  auto sum = 0.0;
+  for (auto i = 0; i < x.num_rows(); ++i) {
+    sum += x(i) * x(i);
+  }
+  return std::sqrt(sum);
 }
 
 double inf_norm(const Vector& x) {
-  double result = 0.0;
-  // WRITE ME
-
+  double result = std::numeric_limits<double>::lowest();
+  for (auto i = 0; i < x.num_rows(); ++i) {
+    result = std::max(result, x(i));
+  }
   return result;
 }
 
