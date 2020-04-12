@@ -11,6 +11,7 @@
 #include <complex>
 #include <cstddef>
 #include <iostream>
+// #include <cmath>
 
 #define cimg_display 0
 #include "CImg.h"
@@ -25,8 +26,8 @@ std::complex<double> xy_to_complex(int ix, int iy) {
   return v * stretch + origin;
 }
 
-std::complex<double> f(std::complex<double> x)  { return /* FIX ME */ 1.0; }  // f(x) = x^6 + 13x^4 - 11
-std::complex<double> fp(std::complex<double> x) { return /* FIX ME */ 1.0; }  // derivative of f
+std::complex<double> f(std::complex<double> x)  { return std::pow(x, 6.0) + std::complex<double>{13.0, 0.0} * std::pow(x, 4.0) - std::complex<double>{11, 0.0}; }
+std::complex<double> fp(std::complex<double> x) { return std::complex<double>{6.0, 0.0} * std::pow(x, 5.0) + std::complex<double>{52.0, 0.0} * std::pow(x, 3.0); }
 
 int newt(std::complex<double> x0) {
   for (int i = 0; i < 256; ++i) {
