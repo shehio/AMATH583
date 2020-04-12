@@ -72,9 +72,23 @@ double one_norm(const Matrix& A) {
 
 
 double inf_norm(const Matrix& A) {
-  double sum = 0.0;
-  // WRITE ME
+  auto sum = 0.0;
+  for (auto i = 0; i < A.num_rows(); ++i) {
+    auto tmp = 0.0;
+    for (auto j = 0; j < A.num_cols(); ++j) {
+      tmp += std::abs(A(i, j));
+    }
+    sum = std::max(sum, tmp);
+  }
   return sum;
 }
 
-// WRITE ME f_norm()
+double f_norm(const Matrix& A) {
+  auto sum = 0.0;
+  for (auto i = 0; i < A.num_rows(); ++i) {
+    for (auto j = 0; j < A.num_cols(); ++j) {
+      sum += std::abs(A(i, j));
+    }
+  }
+  return std::sqrt(sum);
+}

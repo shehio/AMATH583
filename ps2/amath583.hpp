@@ -26,7 +26,7 @@ double two_norm_d(const Vector& x);
 
 double one_norm(const Matrix& x);
 
-// 583 need to add inf_norm for matrix
-// and optionally f_norm for matrix
+double inf_norm(const Matrix& A);
+double f_norm(const Matrix& A);
 
 #endif    // AMATH583_HPP
