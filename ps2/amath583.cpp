@@ -87,7 +87,7 @@ double f_norm(const Matrix& A) {
   auto sum = 0.0;
   for (auto i = 0; i < A.num_rows(); ++i) {
     for (auto j = 0; j < A.num_cols(); ++j) {
-      sum += std::abs(A(i, j));
+      sum += A(i, j) * A(i, j);
     }
   }
   return std::sqrt(sum);
