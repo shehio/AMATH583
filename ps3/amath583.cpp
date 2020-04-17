@@ -255,7 +255,7 @@ void mult_trans_0(const Matrix& A, const Matrix& B, Matrix& C) {
   for (size_t i = 0; i < C.num_rows(); ++i) {
     for (size_t j = 0; j < C.num_cols(); ++j) {
       for (size_t k = 0; k < A.num_cols(); ++k) {
-        // WRITE ME
+        C(i, j) += A(i, k) * B(j, k);
       }
     }
   }

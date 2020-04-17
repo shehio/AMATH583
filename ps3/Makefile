@@ -10,7 +10,7 @@
 
 CXX             := c++
 
-OPTS            := -Ofast -march=native # -DNDEBUG
+OPTS            := -Ofast -march=native -DNDEBUG
 LANG            := -std=c++11
 PICKY           := -Wall
 CXXFLAGS        := $(LANG) $(OPTS) $(PICKY) 
