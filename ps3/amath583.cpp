@@ -300,7 +300,6 @@ void mult_trans_3(const Matrix& A, const Matrix& B, Matrix& C) {
 
         size_t stop_i  = std::min(ii + blocksize, C.num_rows());
         size_t stop_j  = std::min(jj + blocksize, C.num_cols());
-        size_t stop_k  = std::min(kk + blocksize, A.num_cols());
 
         for (size_t i = ii; i < stop_i; i += 2) {
           for (size_t j = jj; j < stop_j; j += 2) {
@@ -323,7 +322,6 @@ void mult_trans_4(const Matrix& A, Matrix& C) {
 
         size_t stop_i  = std::min(ii + blocksize, C.num_rows());
         size_t stop_j  = std::min(jj + blocksize, C.num_cols());
-        size_t stop_k  = std::min(kk + blocksize, A.num_cols());
 
         for (size_t i = ii; i < stop_i; i += 2) {
           for (size_t j = jj; j < stop_j; j += 2) {

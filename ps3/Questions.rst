@@ -44,15 +44,18 @@ Efficiency
 ----------
 
 10.  If you double the problem size for matrix-matrix product, how many more operations will matrix-matrix product perform?
+Since the complexity of the algorithm is O(n *** 3), if you double n, the operations will increase eightfolds.
 
 11.  If the time to perform a given operation is constant, when you double the problem size for matrix-matrix product, how much more time will be required to compute the answer?
+Assuming the operation takes a constant time, then the increase will be still eightfold.
 
 12.  What ratio did you see when doubling the problem size when mmtime called `mult_0`?  (Hint, it may be larger than what pure operation count would predict.)  Explain.
+For all the number of iterations that I tried, the number was between 9 and 13. The reason the ratio is more than 8 is that theoritical bounds generally don't take into account memory operations and processes swaps from the OS. These operations are extremely expensive. There's one outlier 1024 --> 2048, an outlier of 30.
 
 13.  What raio did you see when doubling the problem size when mmtime called `mult_3`?  Was this the same for `mult_0`?  Referring to the function in amath583.cpp, what optimizations are implemented and what kinds of performance benefits might they provide?
+The numbers are between 8 and 9. No, they're way less than `mul_0`.
 
 14. (Extra credit.)  Try also with `mult_1` and `mult_2`.
-
 
 
 All-Pairs
