@@ -1,2 +1,6 @@
 .DS_Store
 .vscode/
+*.o
+*.exe
+*.bmp
+train-images.idx3-ubyte

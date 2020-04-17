@@ -131,9 +131,13 @@ void   matmat(const Matrix& A, const Vector& B, Matrix& C);
 
 
 Matrix transpose(const Matrix& A) {
-  Matrix B ( 0, 0 /* fix me */ );
+  Matrix B (A.num_cols(), A.num_rows());
 
-  // WRITE ME
+  for (size_t i = 0; i < A.num_rows(); ++i) {
+    for (size_t j = 0; j < A.num_cols(); ++j) {
+      B(j, i) = A(i, j);
+    }
+  }
 
   return B;
 }

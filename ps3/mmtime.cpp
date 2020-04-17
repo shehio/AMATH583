@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 
   Timer t;
   t.start();
-  mult_3(A, B, C);
+  mult_1(A, B, C);
   t.stop();
   
   std::cout << "mult_0(A, B, C) for size = " << size << " took " << t.elapsed() << " ms" << std::endl;
