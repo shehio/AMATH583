@@ -72,8 +72,12 @@ double two_norm(const Matrix& x);
 double inf_norm(const Matrix& x);
 
 double f_norm(const Matrix& A) {
-  double sum = 0;
-  // WRITE ME
+  auto sum = 0.0;
+  for (auto i = 0; i < A.num_rows(); ++i) {
+    for (auto j = 0; j < A.num_cols(); ++j) {
+      sum += A(i, j) * A(i, j);
+    }
+  }
   return std::sqrt(sum);
 }
 
@@ -90,8 +94,14 @@ Matrix operator+(const Matrix& A, const Matrix& B) {
 }
 
 Matrix operator-(const Matrix& A, const Matrix& B) {
+  assert(A.num_rows() == B.num_rows());
+  assert(A.num_cols() == B.num_cols());
   Matrix C(A.num_rows(), A.num_cols());
-  // WRITE ME (including assertions)
+  for (size_t i = 0; i < A.num_rows(); ++i) {
+    for (size_t j = 0; j < A.num_cols(); ++j) {
+      C(i,j) = A(i, j) - B(i, j);
+    }
+  }
   return C;
 }
 
