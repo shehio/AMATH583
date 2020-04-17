@@ -8,15 +8,18 @@ argv
 ----
 
 1. What does `argv[0]` always contain?
+The name of the program.
 
 
 2. Which entry of `argv` holds the first argument passed to the program?
-
+The second one, that is argv[1].
 
 3. Which entry of `argv` holds the second argument passed to the program?
-
+The third one, that is argv[2].
 
 4. How would you print just the last argument passed to a program?
+int length = sizeof(argv)/sizeof(argv[0]);
+std::cout << argv[length - 1] << std::endl;
 
 float vs double
 ----------------

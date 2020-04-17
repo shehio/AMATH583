@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[])  {
 
-  int size = argv[1];
+  int size = atoi(argv[1]);
 
   std::cout << "size is " << size << std::endl;
 
