@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
   }
   size_t loops = std::stol(argv[1]);
 
-  long a = 3, b = 314, c = 159;
+  double a = 3, b = 314, c = 159;
 
   Timer T;
   T.start();
