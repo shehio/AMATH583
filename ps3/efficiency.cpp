@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
   }
   T.stop();
 
+  std::cout << c << std::endl;
   std::cout << loops << " loops took " << T.elapsed() << " milliseconds" << std::endl;
 
   return 0;

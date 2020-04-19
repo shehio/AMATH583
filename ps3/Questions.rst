@@ -18,8 +18,7 @@ The second one, that is argv[1].
 The third one, that is argv[2].
 
 4. How would you print just the last argument passed to a program?
-int length = sizeof(argv)/sizeof(argv[0]);
-std::cout << argv[length - 1] << std::endl;
+std::cout << argv[argc - 1] << std::endl;
 
 float vs double
 ----------------
