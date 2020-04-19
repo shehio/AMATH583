@@ -361,7 +361,22 @@ void mult_trans_4(const Matrix& A, Matrix& C) {
 
         for (size_t i = ii; i < stop_i; i += 2) {
           for (size_t j = jj; j < stop_j; j += 2) {
-	    // WRITE ME
+            double t00 = C(i, j);
+            double t01 = C(i, j + 1);
+            double t10 = C(i + 1, j);
+            double t11 = C(i + 1, j + 1);
+
+            for (size_t k = kk; k < stop_k; ++k) {
+              t00 += A(i, k) * A(j, k);
+              t01 += A(i, k) * A(j + 1, k);
+              t10 += A(i + 1, k) * A(j, k);
+              t11 += A(i + 1, k) * A(j + 1, k);
+            }
+
+            C(i, j)         = t00;
+            C(i, j + 1)     = t01;
+            C(i + 1, j)     = t10;
+            C(i + 1, j + 1) = t11;
 	        }
         }
       }

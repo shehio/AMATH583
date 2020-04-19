@@ -25,19 +25,26 @@ float vs double
 
 5.  What is the difference (ratio) in execution times 
 between single and double precision for    *construction with no optimization*? Explain.
+The difference is around 10%. This is understandable since the program asks for a contiguous amount of memory to store the vector.
+It happens that this amount of memory for the double type is 64xN while for the float type is 32xN where N is the length of the vector.
+Finding and allocating this amount of memory obviously take more time for the bigger amount of memory.
 
 6.  What is the difference (ratio) in execution times
 between single and double precision for    *multiplication with no optimization*? Explain.
+It's around 10% higher for the double data type. I attribute that to the operation (the multiplication)
+having to deal with 64 bits for doubles rather than 32 bits for floats.
 
 7.  What is the difference (ratio) in execution times 
 between single and double precision for    *construction with optimization*? Explain.
+It's the double for the double type.
 
 8.  What is the difference (ratio) in execution times 
 between single and double precision for    *multiplication with optimization*? Explain. 
+The speedup is 2x between doubles and floats.
 
 9.  What is the difference (ratio) in execution times 
 for double precision    multiplication with and without optimization? Explain. 
-
+It's a little north of 3x. This might be due to loop unrolling in O3.
 
 Efficiency
 ----------
@@ -46,12 +53,12 @@ Efficiency
 Since the complexity of the algorithm is O(n *** 3), if you double n, the operations will increase eightfolds.
 
 11.  If the time to perform a given operation is constant, when you double the problem size for matrix-matrix product, how much more time will be required to compute the answer?
-Assuming the operation takes a constant time, then the increase will be still eightfold.
+Assuming the operation takes a constant time, then the runtime will also increase eightfolds.
 
 12.  What ratio did you see when doubling the problem size when mmtime called `mult_0`?  (Hint, it may be larger than what pure operation count would predict.)  Explain.
-For all the number of iterations that I tried, the number was between 9 and 13. The reason the ratio is more than 8 is that theoritical bounds generally don't take into account memory operations and processes swaps from the OS. These operations are extremely expensive. There's one outlier 1024 --> 2048, an outlier of 30.
+For all the number of iterations that I tried, the number was between 9 and 13. The reason the ratio is more than 8 is that theoritical bounds generally don't take into account memory operations and processes swaps from the OS. These operations are extremely expensive.
 
-13.  What raio did you see when doubling the problem size when mmtime called `mult_3`?  Was this the same for `mult_0`?  Referring to the function in amath583.cpp, what optimizations are implemented and what kinds of performance benefits might they provide?
+13.  What ratio did you see when doubling the problem size when mmtime called `mult_3`?  Was this the same for `mult_0`?  Referring to the function in amath583.cpp, what optimizations are implemented and what kinds of performance benefits might they provide?
 The numbers are between 8 and 9. No, they're way less than `mul_0`.
 
 14. (Extra credit.)  Try also with `mult_1` and `mult_2`.
