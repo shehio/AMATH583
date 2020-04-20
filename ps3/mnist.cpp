@@ -22,7 +22,7 @@ using namespace cimg_library;
 void usage(const std::string& msg) { std::cout << "Usage: " << msg << " mnist_file [ max_images ]" << std::endl; }
 
 double gflops(const Matrix& similarity, const Matrix& A, double elapsed_ms) {
-  double flops    = 2.0 * similarity.num_rows() * similarity.num_cols() * A.num_cols();
+  double flops = 2.0 * similarity.num_rows() * similarity.num_cols() * A.num_cols();
   if (elapsed_ms == 0.0) {
     return -1.0;
   }
@@ -48,13 +48,14 @@ std::vector<std::string> names = {
   "m_t_2(A,A)", 
   "m_t_3(A,A)", 
 
-  "m_t_4(A)"
-// ,"m_t_5(A,A)"  // Extra Credit
+  "m_t_4(A)",
+  "m_t_5(A,A)"  // Extra Credit
   };
 
 
 template <class F, class Mat, class V1, class V2>
 void run_benchmark(int i, F f, const Mat& A, const Mat& B, Mat& S, V1& layout, V2& times) {
+  // std::cout<< i << std::endl;
   Timer t;
   if (layout[i] == false) {
     t.start();
@@ -106,6 +107,7 @@ int main(int argc, char* argv[]) {
 
     Matrix similarity(num_images, num_images);
     Matrix B = transpose(A);
+
     Matrix C = A;
 
     times.push_back(num_images);
@@ -133,13 +135,26 @@ int main(int argc, char* argv[]) {
       double g = gflops(similarity, A, t.elapsed());
       times.push_back(g);
       if (g < 2.0) {
-	layout[12] = true;
+	      layout[12] = true;
       }
     } else {
       times.push_back(-1.0);
     }
 
-    //run_benchmark(13, mult_trans_5, A, A, similarity, layout, times); // Extra Credit
+    // if (layout[13] == false) {
+    //   t.start();
+    //   mult_trans_5(A, B, similarity);      
+    //   t.stop();
+    //   double g = gflops(similarity, A, t.elapsed());
+    //   times.push_back(g);
+    //   if (g < 2.0) {
+	  //     layout[13] = true;
+    //   }
+    // } else {
+    //   times.push_back(-1.0);
+    // }
+
+    run_benchmark(13, mult_trans_5, A, A, similarity, layout, times); // Extra Credit
 
     all_times.push_back(times);
     
@@ -152,12 +167,12 @@ int main(int argc, char* argv[]) {
     double       max_val = 0;
     for (size_t i = 0; i < num_images; ++i) {
       for (size_t j = 0; j < num_images; ++j) {
-	max_val = std::max(max_val, similarity(i, j));
+	      max_val = std::max(max_val, similarity(i, j));
       }
     }
     for (size_t i = 0; i < num_images; ++i) {
       for (size_t j = 0; j < num_images; ++j) {
-	sim_img(i, j, 0, 0) = 255.0 * similarity(i, j) / max_val;
+	      sim_img(i, j, 0, 0) = 255.0 * similarity(i, j) / max_val;
       }
     }
     sim_img.save_bmp(("mnist_similarity_" + std::to_string(num_images) + ".bmp").c_str());

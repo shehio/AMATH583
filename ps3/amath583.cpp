@@ -389,11 +389,12 @@ void mult_trans_5(const Matrix& A, const Matrix& B, Matrix& C) {
   assert(A.num_rows() == C.num_rows());
   assert(B.num_rows() == C.num_cols());
   assert(A.num_cols() == B.num_cols());
+  // std::cout << "here" << std::endl;
 
-  Matrix test(C.num_rows(), C.num_cols());
-  Matrix test2(C.num_rows(), C.num_cols());
-  mult_trans_0(A, B, test);
-  mult_0(A, B, test2);
+  // Matrix test(C.num_rows(), C.num_cols());
+  // Matrix test2(C.num_rows(), C.num_cols());
+  // mult_trans_0(A, B, test);
+  // mult_0(A, B, test2);
 
   Matrix ret = strassen(A, transpose(B));
 
@@ -413,16 +414,74 @@ void mult_trans_5(const Matrix& A, const Matrix& B, Matrix& C) {
   }
 }
 
+int next_power_of_two(int n) {
+    auto log2 = ceil(log(n) / log(2));
+    return pow(2, log2);
+}
+
+// Assumes that aux is way bigger than A in all dimensions.
+void fill_aux(const Matrix& A, Matrix& aux)
+{
+  for (auto i = 0; i < A.num_rows(); i++)
+  {
+    for (auto j = 0; j < aux.num_cols(); j++){
+      aux(i, j) += A(i, j);
+    }
+  }
+
+  // for (auto i = 0; i < aux.num_rows(); i++)
+  // {
+  //   std::cout<< "i: "<< i << std::endl;
+  //   for (auto j = A.num_cols(); j < aux.num_cols(); j++)
+  //   {
+  //     std::cout<< "j: "<< j << std::endl;
+  //     aux(i, j) = 0;
+  //   }
+  // }
+}
+
 // Assumes that A and B are square matrices of power 2.
 Matrix strassen(const Matrix& A, const Matrix& B) {
-  int n = A.num_rows();
+  int n1 = A.num_rows();
+  int n2 = A.num_cols();
+  int n3 = B.num_rows();
+  int n4 = B.num_cols();
+  int n = n1;
+  int new_n = n;
+
+  Matrix aux_A(0, 0), aux_B(0, 0);
+  if (ceil(log2(n1)) == floor(log2(n1)) && ceil(log2(n2)) == floor(log2(n2)) && ceil(log2(n3)) == floor(log2(n3)) && n1 == n2 && n3 == n4 && n1 == n3 ){
+    // std::cout<< "NAAAAH"<<std::endl;
+    aux_A = A;
+    aux_B = B;
+  }
+  else{
+    new_n = next_power_of_two(std::max(std::max(A.num_rows(), A.num_cols()), B.num_cols()));
+    aux_A = Matrix(new_n, new_n);
+    aux_B = Matrix(new_n, new_n);
+
+
+    // std::cout<< "aux A"<<std::endl;
+    // print(aux_A);
+
+    fill_aux(A, aux_A);
+    fill_aux(B, aux_B);
+
+    // std::cout<< "A"<<std::endl;
+    // print(A);
+
+    // std::cout<< "aux A"<<std::endl;
+    // print(aux_A);
+    
+  }
+
   int LEAF_SIZE = 2;
   Matrix ret(n, n);
 
   if (n <= LEAF_SIZE) {
-    for (size_t i = 0; i < A.num_rows(); ++i) {
-      for (size_t j = 0; j < A.num_cols(); ++j) {
-        for (size_t k = 0; k < A.num_cols(); ++k) {
+    for (size_t i = 0; i < aux_A.num_rows(); ++i) {
+      for (size_t j = 0; j < aux_A.num_cols(); ++j) {
+        for (size_t k = 0; k < aux_A.num_cols(); ++k) {
           ret(i, j) += A(i, k) * B(k, j);
         }
       }
@@ -430,7 +489,7 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
   }
   else
   {
-    int half_size = n / 2;
+    int half_size = new_n / 2;
 
     Matrix a11(half_size, half_size);
     Matrix a12(half_size, half_size);
@@ -444,36 +503,17 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
 
     for (int i = 0; i < half_size; i++) {
       for (int j = 0; j < half_size; j++) {
-          a11(i, j) = A(i, j);
-          a12(i, j) = A(i, j + half_size);
-          a21(i, j) = A(i + half_size, j);
-          a22(i, j) = A(i + half_size, j + half_size);
+          a11(i, j) = aux_A(i, j);
+          a12(i, j) = aux_A(i, j + half_size);
+          a21(i, j) = aux_A(i + half_size, j);
+          a22(i, j) = aux_A(i + half_size, j + half_size);
 
-          b11(i, j) = B(i, j);
-          b12(i, j) = B(i, j + half_size);
-          b21(i, j) = B(i + half_size, j);
-          b22(i, j) = B(i + half_size, j + half_size);
+          b11(i, j) = aux_B(i, j);
+          b12(i, j) = aux_B(i, j + half_size);
+          b21(i, j) = aux_B(i + half_size, j);
+          b22(i, j) = aux_B(i + half_size, j + half_size);
       }
     }
-
-    // std::cout << "a11" << std::endl;
-    // print(a11);
-
-    // std::cout << "a22" << std::endl;
-    // print(a22);
-
-    // std::cout << "a11 + a22" << std::endl;
-
-    // print(a11 + a22);
-
-    // std::cout << "b11" << std::endl;
-    // print(b11);
-
-    // std::cout << "b22" << std::endl;
-    // print(b22);
-
-    // std::cout << "b11 + b22" << std::endl;
-    // print(b11 + b22);
 
     Matrix M1 = strassen(a11 + a22, b11 + b22);
 
