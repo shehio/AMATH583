@@ -14,6 +14,7 @@
 #include <random>
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 
 // ----------------------------------------------------------------
@@ -389,5 +390,127 @@ void mult_trans_5(const Matrix& A, const Matrix& B, Matrix& C) {
   assert(B.num_rows() == C.num_cols());
   assert(A.num_cols() == B.num_cols());
 
-  // WRITE ME for Extra Credit
+  Matrix test(C.num_rows(), C.num_cols());
+  Matrix test2(C.num_rows(), C.num_cols());
+  mult_trans_0(A, B, test);
+  mult_0(A, B, test2);
+
+  Matrix ret = strassen(A, transpose(B));
+
+  // std::cout << "Trans Mult 0" << std::endl;
+  // print(test);
+  // std::cout << "Mult 0" << std::endl;
+  // print(test2);
+
+  // std::cout << "C strassen w transpose B" << std::endl;
+  // print(ret);
+
+
+  for (int i = 0; i < C.num_rows(); i++) {
+    for (int j = 0; j < C.num_cols(); j++) {
+        C(i, j) = ret(i, j);
+    }
+  }
+}
+
+// Assumes that A and B are square matrices of power 2.
+Matrix strassen(const Matrix& A, const Matrix& B) {
+  int n = A.num_rows();
+  int LEAF_SIZE = 2;
+  Matrix ret(n, n);
+
+  if (n <= LEAF_SIZE) {
+    for (size_t i = 0; i < A.num_rows(); ++i) {
+      for (size_t j = 0; j < A.num_cols(); ++j) {
+        for (size_t k = 0; k < A.num_cols(); ++k) {
+          ret(i, j) += A(i, k) * B(k, j);
+        }
+      }
+    }
+  }
+  else
+  {
+    int half_size = n / 2;
+
+    Matrix a11(half_size, half_size);
+    Matrix a12(half_size, half_size);
+    Matrix a21(half_size, half_size);
+    Matrix a22(half_size, half_size);
+
+    Matrix b11(half_size, half_size);
+    Matrix b12(half_size, half_size);
+    Matrix b21(half_size, half_size);
+    Matrix b22(half_size, half_size);
+
+    for (int i = 0; i < half_size; i++) {
+      for (int j = 0; j < half_size; j++) {
+          a11(i, j) = A(i, j);
+          a12(i, j) = A(i, j + half_size);
+          a21(i, j) = A(i + half_size, j);
+          a22(i, j) = A(i + half_size, j + half_size);
+
+          b11(i, j) = B(i, j);
+          b12(i, j) = B(i, j + half_size);
+          b21(i, j) = B(i + half_size, j);
+          b22(i, j) = B(i + half_size, j + half_size);
+      }
+    }
+
+    // std::cout << "a11" << std::endl;
+    // print(a11);
+
+    // std::cout << "a22" << std::endl;
+    // print(a22);
+
+    // std::cout << "a11 + a22" << std::endl;
+
+    // print(a11 + a22);
+
+    // std::cout << "b11" << std::endl;
+    // print(b11);
+
+    // std::cout << "b22" << std::endl;
+    // print(b22);
+
+    // std::cout << "b11 + b22" << std::endl;
+    // print(b11 + b22);
+
+    Matrix M1 = strassen(a11 + a22, b11 + b22);
+
+    Matrix M2 = strassen(a21 + a22, b11);
+    Matrix M3 = strassen(a11, b12 - b22);
+    Matrix M4 = strassen(a22, b21 - b11);
+    Matrix M5 = strassen(a11 + a12, b22);
+    Matrix M6 = strassen(a21 - a11, b11 + b12);
+    Matrix M7 = strassen(a12 - a22, b21 + b22);
+
+    Matrix c11 = M1 + M4 - M5 + M7;
+    Matrix c12 = M3 + M5;
+    Matrix c21 = M2 + M4;
+    Matrix c22 = M1 - M2 + M3 + M6;
+    
+    for (int i = 0; i < half_size; i++) {
+      for (int j = 0; j < half_size; j++) {
+          ret(i, j) = c11(i, j);
+          ret(i, j + half_size) = c12(i, j);
+          ret(i + half_size, j) = c21(i, j);
+          ret(i + half_size, j + half_size) = c22(i, j);
+      }
+    }
+  }
+
+  return ret;
+}
+
+void print(const Matrix& A) 
+{
+  for (int i = 0; i < A.num_rows(); i++)
+  {
+    for (int j = 0; j < A.num_cols(); j++)
+    {
+      std::cout << A(i, j) << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
 }
