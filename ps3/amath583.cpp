@@ -16,6 +16,15 @@
 #include <cmath>
 #include <iostream>
 
+int is_power_of_two(int n) {
+    return ceil(log2(n)) == floor(log2(n));
+}
+
+int get_next_power_of_two(int n) {
+    auto log2 = ceil(log(n) / log(2));
+    return pow(2, log2);
+}
+
 void print(const Matrix& A) 
 {
   for (int i = 0; i < A.num_rows(); i++)
@@ -27,11 +36,6 @@ void print(const Matrix& A)
     std::cout << std::endl;
   }
   std::cout << std::endl;
-}
-
-int next_power_of_two(int n) {
-    auto log2 = ceil(log(n) / log(2));
-    return pow(2, log2);
 }
 
 // Assumes that aux is way bigger than A in all dimensions.
@@ -427,31 +431,32 @@ void mult_trans_5(const Matrix& A, const Matrix& B, Matrix& C) {
   }
 }
 
-// Assumes that A and B are square matrices of power 2.
 Matrix strassen(const Matrix& A, const Matrix& B) {
+  assert(A.num_rows() == B.num_cols());
+
   int n1 = A.num_rows();
   int n2 = A.num_cols();
   int n3 = B.num_rows();
-  int n4 = B.num_cols();
   int n = n1;
   int new_n = n;
+  auto are_square_matrices = is_power_of_two(n1) && is_power_of_two(n2)
+    && is_power_of_two(n3) && n1 == n2 && n1 == n3;
 
   Matrix aux_A(0, 0), aux_B(0, 0);
-  if (ceil(log2(n1)) == floor(log2(n1)) && ceil(log2(n2)) == floor(log2(n2)) && ceil(log2(n3)) == floor(log2(n3)) && n1 == n2 && n3 == n4 && n1 == n3 ){
+  if (are_square_matrices){
     aux_A = A;
     aux_B = B;
   }
   else{
-    new_n = next_power_of_two(std::max(std::max(A.num_rows(), A.num_cols()), B.num_cols()));
+    new_n = get_next_power_of_two(std::max(std::max(n1, n2), n3));
     aux_A = Matrix(new_n, new_n);
     aux_B = Matrix(new_n, new_n);
 
     fill_aux(A, aux_A);
     fill_aux(B, aux_B);
-    
   }
 
-  auto leaf_size = 2;
+  auto leaf_size = 2; // Chosen arbitrarily.
   Matrix ret(n, n);
 
   if (n <= leaf_size) {
