@@ -80,6 +80,5 @@ void mult_trans_3(const Matrix& A, const Matrix& B, Matrix& C);
 void mult_trans_4(const Matrix& A, Matrix& C);
 void mult_trans_5(const Matrix& A, const Matrix& B, Matrix& C);
 Matrix strassen(const Matrix& A, const Matrix& B);
-void print(const Matrix& A);
 
 #endif    //  AMATH_583_AMATH583_HPP

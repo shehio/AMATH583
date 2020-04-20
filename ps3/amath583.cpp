@@ -16,6 +16,34 @@
 #include <cmath>
 #include <iostream>
 
+void print(const Matrix& A) 
+{
+  for (int i = 0; i < A.num_rows(); i++)
+  {
+    for (int j = 0; j < A.num_cols(); j++)
+    {
+      std::cout << A(i, j) << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+int next_power_of_two(int n) {
+    auto log2 = ceil(log(n) / log(2));
+    return pow(2, log2);
+}
+
+// Assumes that aux is way bigger than A in all dimensions.
+void fill_aux(const Matrix& A, Matrix& aux)
+{
+  for (auto i = 0; i < A.num_rows(); i++)
+  {
+    for (auto j = 0; j < aux.num_cols(); j++){
+      aux(i, j) += A(i, j);
+    }
+  }
+}
 
 // ----------------------------------------------------------------
 //
@@ -389,55 +417,14 @@ void mult_trans_5(const Matrix& A, const Matrix& B, Matrix& C) {
   assert(A.num_rows() == C.num_rows());
   assert(B.num_rows() == C.num_cols());
   assert(A.num_cols() == B.num_cols());
-  // std::cout << "here" << std::endl;
-
-  // Matrix test(C.num_rows(), C.num_cols());
-  // Matrix test2(C.num_rows(), C.num_cols());
-  // mult_trans_0(A, B, test);
-  // mult_0(A, B, test2);
 
   Matrix ret = strassen(A, transpose(B));
-
-  // std::cout << "Trans Mult 0" << std::endl;
-  // print(test);
-  // std::cout << "Mult 0" << std::endl;
-  // print(test2);
-
-  // std::cout << "C strassen w transpose B" << std::endl;
-  // print(ret);
-
 
   for (int i = 0; i < C.num_rows(); i++) {
     for (int j = 0; j < C.num_cols(); j++) {
         C(i, j) = ret(i, j);
     }
   }
-}
-
-int next_power_of_two(int n) {
-    auto log2 = ceil(log(n) / log(2));
-    return pow(2, log2);
-}
-
-// Assumes that aux is way bigger than A in all dimensions.
-void fill_aux(const Matrix& A, Matrix& aux)
-{
-  for (auto i = 0; i < A.num_rows(); i++)
-  {
-    for (auto j = 0; j < aux.num_cols(); j++){
-      aux(i, j) += A(i, j);
-    }
-  }
-
-  // for (auto i = 0; i < aux.num_rows(); i++)
-  // {
-  //   std::cout<< "i: "<< i << std::endl;
-  //   for (auto j = A.num_cols(); j < aux.num_cols(); j++)
-  //   {
-  //     std::cout<< "j: "<< j << std::endl;
-  //     aux(i, j) = 0;
-  //   }
-  // }
 }
 
 // Assumes that A and B are square matrices of power 2.
@@ -451,7 +438,6 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
 
   Matrix aux_A(0, 0), aux_B(0, 0);
   if (ceil(log2(n1)) == floor(log2(n1)) && ceil(log2(n2)) == floor(log2(n2)) && ceil(log2(n3)) == floor(log2(n3)) && n1 == n2 && n3 == n4 && n1 == n3 ){
-    // std::cout<< "NAAAAH"<<std::endl;
     aux_A = A;
     aux_B = B;
   }
@@ -460,25 +446,15 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
     aux_A = Matrix(new_n, new_n);
     aux_B = Matrix(new_n, new_n);
 
-
-    // std::cout<< "aux A"<<std::endl;
-    // print(aux_A);
-
     fill_aux(A, aux_A);
     fill_aux(B, aux_B);
-
-    // std::cout<< "A"<<std::endl;
-    // print(A);
-
-    // std::cout<< "aux A"<<std::endl;
-    // print(aux_A);
     
   }
 
-  int LEAF_SIZE = 2;
+  auto leaf_size = 2;
   Matrix ret(n, n);
 
-  if (n <= LEAF_SIZE) {
+  if (n <= leaf_size) {
     for (size_t i = 0; i < aux_A.num_rows(); ++i) {
       for (size_t j = 0; j < aux_A.num_cols(); ++j) {
         for (size_t k = 0; k < aux_A.num_cols(); ++k) {
@@ -540,17 +516,4 @@ Matrix strassen(const Matrix& A, const Matrix& B) {
   }
 
   return ret;
-}
-
-void print(const Matrix& A) 
-{
-  for (int i = 0; i < A.num_rows(); i++)
-  {
-    for (int j = 0; j < A.num_cols(); j++)
-    {
-      std::cout << A(i, j) << " ";
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
 }
