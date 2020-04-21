@@ -36,15 +36,18 @@ having to deal with 64 bits for doubles rather than 32 bits for floats.
 
 7.  What is the difference (ratio) in execution times 
 between single and double precision for    *construction with optimization*? Explain.
-It's the double for the double type.
+It's the double for the double type. This might be for an efficient way the optimized compiled code is looking for
+a smaller amount of contiguous memory. 
 
 8.  What is the difference (ratio) in execution times 
 between single and double precision for    *multiplication with optimization*? Explain. 
-The speedup is 2x between doubles and floats.
+The speedup is 2x between doubles and floats. The hypothesis here is that maybe the non-optimized code has the CPU
+deal with the whole "word." While the optimized version of it doesn't have to deal with that and has the CPU perform the
+operation on half a "word."
 
 9.  What is the difference (ratio) in execution times 
 for double precision    multiplication with and without optimization? Explain. 
-It's a little north of 3x. This might be due to loop unrolling in O3.
+It's a little north of 3x. This might be due to loop unrolling in O3 among with other micro-optimizations.
 
 Efficiency
 ----------
@@ -56,10 +59,10 @@ Since the complexity of the algorithm is O(n *** 3), if you double n, the operat
 Assuming the operation takes a constant time, then the runtime will also increase eightfolds.
 
 12.  What ratio did you see when doubling the problem size when mmtime called `mult_0`?  (Hint, it may be larger than what pure operation count would predict.)  Explain.
-For all the number of iterations that I tried, the number was between 9 and 13. The reason the ratio is more than 8 is that theoritical bounds generally don't take into account memory operations and processes swaps from the OS. These operations are extremely expensive.
+For all the number of iterations that I tried, the number was between 9 and 13. The reason the ratio is more than 8 is that theoritical bounds generally don't take into account memory operations and processes swaps from the OS (if the  process is taking too long to execute). These operations are extremely expensive.
 
 13.  What ratio did you see when doubling the problem size when mmtime called `mult_3`?  Was this the same for `mult_0`?  Referring to the function in amath583.cpp, what optimizations are implemented and what kinds of performance benefits might they provide?
-The numbers are between 8 and 9. No, they're way less than `mul_0`.
+The numbers are between 8 and 9. No, they're way less than `mul_0`. 
 
 14. (Extra credit.)  Try also with `mult_1` and `mult_2`.
 
@@ -68,8 +71,11 @@ All-Pairs
 ---------
 
 15. What do you observe about the different approaches to doing the similarity computation?  Which algorithm (optimizations) are most effective?  Does it pay to make a transpose of A vs a copy of A vs just passing in A itself.  What about passing in A twice vs passing it in once (mult_trans_3 vs mult_trans_4)?
+Different approaches result in different performance. The most effective appears to be m_t_4. Passing only A beats passing the transpose of A which beats the vanila algorithm. The algorithm mult_trans_4 slightly beats mult_trans_3.
 
 16. What is the best performance over all the algorithms that you observed for the case of 1024 images?  What would the execution time be for 10 times as many images?  For 60 times as many images?  (Hint: the answer is not cubic but still potentially a problem.)  What if we wanted to do, say 56 by 56 images instead of 28 by 28?
+The fastest of them all is m_t_4. After running it for a while the GFLOPS of that algorithm stablize at 16.4135 (it will be different on each machine). We can multiply this number with the ratio of operations (say 10 or 60) and we could get the runtime for that algorithm on such a dataset, provided that the base of that algorithm is big enough to see GFLOPS of 16.4135.
+Let's take an example to make things more concrete: if n has 16.4135 GFLOPs and takes time t, then 60n will have 16.4135 GFLOPs and will take 60t.
 
 
 
@@ -77,7 +83,7 @@ About PS3
 ---------
 
 
-17. The most important thing I learned from this assignment was ...
+17. The most important thing I learned from this assignment was writing strassen's algorithm. It was a lot of fun.
 
 
-18. One thing I am still not clear on is ...
+18. One thing I am still not clear on is why we are making hypotheses and testing them while we can look at assembly code and CPU perf metrics.
