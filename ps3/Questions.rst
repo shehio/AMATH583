@@ -65,6 +65,19 @@ For all the number of iterations that I tried, the number was between 9 and 13. 
 The numbers are between 8 and 9. No, they're way less than `mul_0`. 
 
 14. (Extra credit.)  Try also with `mult_1` and `mult_2`.
+For mult_1: The number is still between 9 and 13 jumping to 35 when taking the ratio of time when n = 2048 / time  n = 1024 (like seen in prev algorithms).
+For mult_2: The number is more like mult_3 and less like mult_1, closer to 9.
+
+Here's the table for all the numbers.
+
+Number	Mult_3	Mult_2	Mult_1	    Mult_0
+128       0       0        2         3
+264	      7       9        30        24
+512	      57      76       214       296
+1024	 398	  827      2759      4166
+2048	 3403	 25048     112150	 110125
+4096	 32402	 352181    1.25e+06	 1.30e+06
+
 
 
 All-Pairs
