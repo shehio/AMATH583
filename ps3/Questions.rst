@@ -87,9 +87,7 @@ All-Pairs
 Different approaches result in different performance. The most effective appears to be m_t_4. Passing only A beats passing the transpose of A which beats the vanila algorithm. The algorithm mult_trans_4 slightly beats mult_trans_3.
 
 16. What is the best performance over all the algorithms that you observed for the case of 1024 images?  What would the execution time be for 10 times as many images?  For 60 times as many images?  (Hint: the answer is not cubic but still potentially a problem.)  What if we wanted to do, say 56 by 56 images instead of 28 by 28?
-The fastest of them all is m_t_4. After running it for a while the GFLOPS of that algorithm stablize at 16.4135 (it will be different on each machine). We can multiply this number with the ratio of operations (say 10 or 60) and we could get the runtime for that algorithm on such a dataset, provided that the base of that algorithm is big enough to see GFLOPS of 16.4135.
-Let's take an example to make things more concrete: if n has 16.4135 GFLOPs and takes time t, then 60n will have 16.4135 GFLOPs and will take 60t.
-
+The fastest of them all is m_t_4. After running it for a while the GFLOPS of that algorithm stablize at 16.4135 (it will be different on each machine). We can multiply this number with the ratio of operations (say 10 or 60) and we could get the runtime for that algorithm on such a dataset, provided that the base of that algorithm is big enough to see GFLOPs of 16.4135. Let's take an example to make things more concrete: if n has 16.4135 GFLOPs and takes time t, then 60n will have 16.4135 GFLOPs and will take 60t. 56x56 / 28x28 = 4, so we will need to multiply the stable GFLOPs by a factor of 4.
 
 
 About PS3
