@@ -55,7 +55,6 @@ std::vector<std::string> names = {
 
 template <class F, class Mat, class V1, class V2>
 void run_benchmark(int i, F f, const Mat& A, const Mat& B, Mat& S, V1& layout, V2& times) {
-  // std::cout<< i << std::endl;
   Timer t;
   if (layout[i] == false) {
     t.start();
@@ -140,19 +139,6 @@ int main(int argc, char* argv[]) {
     } else {
       times.push_back(-1.0);
     }
-
-    // if (layout[13] == false) {
-    //   t.start();
-    //   mult_trans_5(A, B, similarity);      
-    //   t.stop();
-    //   double g = gflops(similarity, A, t.elapsed());
-    //   times.push_back(g);
-    //   if (g < 2.0) {
-	  //     layout[13] = true;
-    //   }
-    // } else {
-    //   times.push_back(-1.0);
-    // }
 
     run_benchmark(13, mult_trans_5, A, A, similarity, layout, times); // Extra Credit
 
