@@ -259,7 +259,7 @@ void mult_trans_0(const Matrix& A, const Matrix& B, Matrix& C) {
   for (size_t i = 0; i < C.num_rows(); ++i) {
     for (size_t j = 0; j < C.num_cols(); ++j) {
       for (size_t k = 0; k < A.num_cols(); ++k) {
-        // WRITE ME
+        C(i, j) += A(i, k) * B(j, k);
       }
     }
   }
@@ -275,7 +275,7 @@ void mult_trans_1(const Matrix& A, const Matrix& B, Matrix& C) {
     for (size_t j = 0; j < C.num_cols(); ++j) {
       double t = C(i, j);
       for (size_t k = 0; k < A.num_cols(); ++k) {
-        // WRITE ME
+        t += A(i, k) * B(j, k);
       }
       C(i, j) = t;
     }
@@ -290,7 +290,21 @@ void mult_trans_2(const Matrix& A, const Matrix& B, Matrix& C) {
 
   for (size_t i = 0; i < C.num_rows(); i += 2) {
     for (size_t j = 0; j < C.num_cols(); j += 2) {
-      // WRITE ME
+      double t00 = C(i, j);
+      double t01 = C(i, j + 1);
+      double t10 = C(i + 1, j);
+      double t11 = C(i + 1, j + 1);
+
+      for (size_t k = 0; k < A.num_cols(); ++k) {
+        t00 += A(i, k) * B(j, k);
+        t01 += A(i, k) * B(j + 1, k);
+        t10 += A(i + 1, k) * B(j, k);
+        t11 += A(i + 1, k) * B(j + 1, k);
+      }
+      C(i, j)         = t00;
+      C(i, j + 1)     = t01;
+      C(i + 1, j)     = t10;
+      C(i + 1, j + 1) = t11;
     }
   }
 }
@@ -312,7 +326,22 @@ void mult_trans_3(const Matrix& A, const Matrix& B, Matrix& C) {
 
         for (size_t i = ii; i < stop_i; i += 2) {
           for (size_t j = jj; j < stop_j; j += 2) {
-	    // WRITE ME
+            double t00 = C(i, j);
+            double t01 = C(i, j + 1);
+            double t10 = C(i + 1, j);
+            double t11 = C(i + 1, j + 1);
+
+            for (size_t k = kk; k < stop_k; ++k) {
+              t00 += A(i, k) * B(j, k);
+              t01 += A(i, k) * B(j + 1, k);
+              t10 += A(i + 1, k) * B(j, k);
+              t11 += A(i + 1, k) * B(j + 1, k);
+            }
+
+            C(i, j)         = t00;
+            C(i, j + 1)     = t01;
+            C(i + 1, j)     = t10;
+            C(i + 1, j + 1) = t11;
           }
         }
       }
