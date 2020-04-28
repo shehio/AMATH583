@@ -69,17 +69,40 @@ What is the maximum compute performance of your computer?  (The horizontal line.
 Redundant?
 
 Referring to the figures about how data are stored in memory, what is it about the best performing pair of loops that is so advantageous?
+It depends really on the inner loop and the caches.
+
+Pattern     Inner Loop Cache Misses         Performance
+i, j, k                1                        Fine
+i, k, j                0                        Perfect
+j, i, k                1                        Fine
+j, k, i                2                        Worst
+k, i, j                0                        Perfect
+k, j, i                2                        Worst
+
 
 What will the data access pattern be when we are executing ``mult_trans`` in i,j,k order?  What data are accessed in each if the matrices at step (i,j,k) and what data are accessed at step (i, j, k+1)? Are these accesses advantageous in any way?
 
+for (size_t i = 0; i < C.num_rows(); ++i) {
+    for (size_t j = 0; j < C.num_cols(); ++j) {
+      for (size_t k = 0; k < A.num_cols(); ++k) {
+        C(i, j) += A(i, k) * B(k, j);
+      }
+    }
+  }
+
+i, j, k: C(i, j) += A(i, k) * B(j, k)
+i, j, k: C(i, j) += A(i, k + 1) * B(j, k + 1)
+
+It's advantageous. We incur no cache misses in the inner loop which is great news!
+It is better to have i or j in the first index than k. Since having k in the row index means that you'll cache-miss in every inner loop, which is executed N ** 3 times.
 
 Referring again to how data are stored in memory, explain why hoisting  ``C(i,j)`` out of the inner loop is so beneficial in mult_trans with the "ijk" loop ordering.
+Hoisting it is a great idea since we eliminate the need to even save the memory to the cache. The variable is just stored in a register and no memory (close or far) is needed.
 
 What optimization is applied in going from ``mult_2`` to ``mult_3``?
+Blocking.
 
 How does your maximum achieved performance for ``mult`` (any version) compare to what bandwidth and roofline predicted?
-
-
-
-
+We can see that the upper bound of the roofline model on my current machine is: 51.13 Gflops (from question 6). The maximum that I was able to achieve in all mults is: 12.2353 Gflops.
+The numbers are consistent with what one would expect from this model.
 
