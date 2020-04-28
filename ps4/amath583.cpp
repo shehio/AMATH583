@@ -216,10 +216,12 @@ void mult_3(const Matrix& A, const Matrix& B, Matrix& C) {
   assert(A.num_cols() == B.num_rows());
 
   size_t blocksize = 32;
-  for (size_t ii = 0; ii < C.num_rows(); ii += blocksize) {
-    for (size_t jj = 0; jj < C.num_cols(); jj += blocksize) {
-      for (size_t kk = 0; kk < A.num_cols(); kk += blocksize) {
+  auto transposed = transpose(B);
 
+  for (size_t ii = 0; ii < C.num_rows(); ii += blocksize) {
+    for (size_t kk = 0; kk < A.num_cols(); kk += blocksize) {
+      for (size_t jj = 0; jj < C.num_cols(); jj += blocksize) {
+      
         size_t stop_i  = std::min(ii + blocksize, C.num_rows());
         size_t stop_j  = std::min(jj + blocksize, C.num_cols());
         size_t stop_k  = std::min(kk + blocksize, A.num_cols());
@@ -233,10 +235,10 @@ void mult_3(const Matrix& A, const Matrix& B, Matrix& C) {
             double t11 = C(i + 1, j + 1);
 
             for (size_t k = kk; k < stop_k; ++k) {
-              t00 += A(i, k) * B(k, j);
-              t01 += A(i, k) * B(k, j + 1);
-              t10 += A(i + 1, k) * B(k, j);
-              t11 += A(i + 1, k) * B(k, j + 1);
+              t00 += A(i, k) * transposed(j, k);
+              t01 += A(i, k) * transposed(j + 1, k);
+              t10 += A(i + 1, k) * transposed(j, k);
+              t11 += A(i + 1, k) * transposed(j + 1, k);
             }
 
             C(i, j)         = t00;
@@ -360,13 +362,7 @@ void mult_ijk(const Matrix& A, const Matrix& B, Matrix& C) {
   assert(C.num_cols() == B.num_cols());
   assert(A.num_cols() == B.num_rows());
 
-  for (size_t i = 0; i < C.num_rows(); ++i) {
-    for (size_t j = 0; j < C.num_cols(); ++j) {
-      for (size_t k = 0; k < A.num_cols(); ++k) {
-        C(i, j) += A(i, k) * B(k, j);
-      }
-    }
-  }
+  mult_trans_2(A, transpose(B), C);
 }
 
 void mult_ikj(const Matrix& A, const Matrix& B, Matrix& C) {

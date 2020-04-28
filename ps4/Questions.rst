@@ -9,11 +9,10 @@ CPUID_ECX_SSE42:    128-bit operations.
 CPUID_EDX_SSE2:     128-bit operations.
 
 What is the maximum operand size that your computer will support?
-The maximum operand size is still 8-bytes for arithmatic operations, while 32-bytes for other operations.
+The maximum operand size is still 8-bytes for arithmatic operations, while 32-bytes for other operations. So, 4 floats per cycle.
 
 
-What is the maximum operand size that your computer will support?
-## Redundant?
+How many double-precision floating point numbers can fit into one operand given the maximum operand size that your CPU will support?
 
 
 

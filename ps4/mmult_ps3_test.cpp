@@ -5,6 +5,8 @@
 #include "Matrix.hpp"
 #include "amath583.hpp"
 
+#include "iostream"
+
 void basic_mult(const Matrix& A, const Matrix& B, Matrix& C) {
   REQUIRE(C.num_rows() == A.num_rows());
   REQUIRE(C.num_cols() == B.num_cols());
@@ -17,6 +19,16 @@ void basic_mult(const Matrix& A, const Matrix& B, Matrix& C) {
       }
     }
   }
+}
+
+void print(const Matrix& A)
+{
+  for (size_t i = 0; i < A.num_rows(); ++i) {
+      for (size_t j = 0; j < A.num_cols(); ++j) {
+        std::cout << A(i, j) << " ";
+      }
+      std::cout << std::endl;
+    }
 }
 
 void basic_mult_trans(const Matrix& A, const Matrix& B, Matrix& C) {
