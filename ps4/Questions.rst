@@ -9,7 +9,8 @@ CPUID_ECX_SSE42:    128-bit operations.
 CPUID_EDX_SSE2:     128-bit operations.
 
 What is the maximum operand size that your computer will support?
-The maximum operand size is still 8-bytes for arithmatic operations, while 32-bytes for other operations.
+The maximum operand size is still 8-bytes for arithmatic operations, although we can do 4 in parallel, so that the maximum numbers of bytes for arithmatic operations is 32 bytes.
+We can still do 32-bytes per operand for other operations.
 
 How many double-precision floating point numbers can fit into one operand given the maximum operand size that your CPU will support?
 That would be 32-bytes / 8-bytes for double = 4 numbers.
@@ -45,7 +46,7 @@ L2 Cache is 256K.
 L3 Cache (shared among 6 cores) is 9M.
 
 What is the (potential) maximum compute performance of your computer?  (The horizontal line.)  What are the L1, L2, and RAM bandwidths?  How do those bandwidths correspond to  what was measured above with the bandwidth program?
-The maximum compute performance or the horizontal line is: 1.02264e+11.
+The maximum compute performance or the horizontal line is: 5.11321e+10 flops/sec.
 The given table provides the bandwidth of L1, L2, L3, and RAM.
 
 kernel sz   res_bytes   ntrials        usecs      ttl_bytes         ttl_flops         intensity      flops/sec      bytes/sec
