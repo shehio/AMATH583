@@ -51,6 +51,12 @@ public:
   size_t num_nonzeros() const { return storage_.size(); }
 
   void stream_coordinates(std::ostream& output_file) const {
+    // output_file << "Writing COO:" << std::endl;
+    // output_file << "R" << " ";
+    // output_file << "C" << " ";
+    // output_file << "V";
+    // output_file << std::endl;
+
     for (size_t i = 0; i < num_nonzeros(); ++i) {
       output_file << row_indices_[i] << " ";
       output_file << col_indices_[i] << " ";
@@ -59,6 +65,7 @@ public:
     }
   }
 
+  // mat * x'
   void matvec(const Vector& x, Vector& y) const {
     for (size_t k = 0; k < storage_.size(); ++k) {
       y(row_indices_[k]) += storage_[k] * x(col_indices_[k]);
@@ -66,11 +73,37 @@ public:
   }
 
   void t_matvec(const Vector& x, Vector& y) const {
-    // Write Me 
+    for (size_t k = 0; k < storage_.size(); ++k) {
+      y(col_indices_[k]) += storage_[k] * x(row_indices_[k]);
+    }
   }
 
   void matmat(const Matrix& B, Matrix& C) const {
     // Write Me 
+  }
+
+  void print_to_console() const{
+    for (int i = 0; i < num_rows(); i++)
+    {
+      for (int j = 0; j < num_cols(); j++)
+      {
+        auto covered = false;
+        for (int k = 0; k < num_nonzeros(); k++)
+        {
+          if (row_indices_[k] == i && col_indices_[k] == j)
+          {
+            std::cout << storage_[k] <<  "  ";
+            covered = true;
+          }
+        }
+
+        if (!covered)
+        {
+          std::cout <<  "0  ";
+        }
+      }
+      std::cout << std::endl;
+    }
   }
 
 private:

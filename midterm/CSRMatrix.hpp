@@ -75,11 +75,39 @@ public:
   }
 
   void t_matvec(const Vector& x, Vector& y) const {
-    // Write Me 
+    for (size_t i = 0; i < num_rows_; ++i) {
+      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
+        y(col_indices_[j]) += storage_[j] * x(col_indices_[j]);
+      }
+    }
   }
 
   void matmat(const Matrix& B, Matrix& C) const {
     // Write Me 
+  }
+
+  void print_to_console() const{
+    for (int i = 0; i < num_rows(); i++)
+    {
+      for (int j = 0; j < num_cols(); j++)
+      {
+        auto covered = false;
+        for (int k = row_indices_[i]; k < row_indices_[i + 1]; k++)
+        {
+          if (col_indices_[k] == j)
+          {
+            std::cout << storage_[k] <<  "  ";
+            covered = true;
+          }
+        }
+
+        if (!covered)
+        {
+          std::cout <<  "0  ";
+        }
+      }
+      std::cout << std::endl;
+    }
   }
 
 private:

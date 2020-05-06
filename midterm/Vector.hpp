@@ -12,6 +12,7 @@
 #define AMATH583_VECTOR_HPP
 
 #include <vector>
+#include <iostream>
 
 class Vector {
 public:
@@ -22,6 +23,14 @@ public:
 
   size_t num_rows() const { return num_rows_; }
 
+  void print() const {
+    std::cout << "Printing a vector now: ";
+    for (int i  = 0; i < num_rows_; i++)
+    {
+      std::cout << storage_[i] << " ";
+    }
+    std::cout << std::endl;
+  }
 private:
   size_t              num_rows_;
   std::vector<double> storage_;

@@ -236,6 +236,7 @@ std::tuple<size_t, size_t, std::vector<std::tuple<size_t, size_t, double>>> read
 }
 
 COOMatrix read_coomatrix(const std::string& filename) {
+  std::cout << "filename: " << filename << std::endl;
   std::tuple<size_t, size_t, std::vector<std::tuple<size_t, size_t, double>>> pack = read_mm(filename);
 
   size_t                                          M   = std::get<0>(pack);
@@ -266,12 +267,14 @@ void write_coomatrix(const COOMatrix& A, const std::string& filename) {
 CSRMatrix read_csrmatrix(const std::string& filename) {
   std::tuple<size_t, size_t, std::vector<std::tuple<size_t, size_t, double>>> pack = read_mm(filename);
 
+  typedef std::tuple<size_t, size_t, double> element;
+
   size_t                                          M   = std::get<0>(pack);
   size_t                                          N   = std::get<1>(pack);
-  std::vector<std::tuple<size_t, size_t, double>> aos = std::get<2>(pack);
+  std::vector<element> aos = std::get<2>(pack);
 
   // sort by row
-  std::sort(aos.begin(), aos.end(), [](auto& a, auto& b) -> bool { return (std::get<0>(a) < std::get<0>(b)); });
+  std::sort(aos.begin(), aos.end(), [](element& a, element& b) -> bool { return (std::get<0>(a) < std::get<0>(b)); });
 
   CSRMatrix A(M, N);
   A.open_for_push_back();
@@ -296,13 +299,14 @@ void write_csrmatrix(const CSRMatrix& A, std::string filename) {
 
 CSCMatrix read_cscmatrix(const std::string& filename) {
   std::tuple<size_t, size_t, std::vector<std::tuple<size_t, size_t, double>>> pack = read_mm(filename);
+  typedef std::tuple<size_t, size_t, double> element;
 
   size_t                                          M   = std::get<0>(pack);
   size_t                                          N   = std::get<1>(pack);
-  std::vector<std::tuple<size_t, size_t, double>> aos = std::get<2>(pack);
+  std::vector<element> aos = std::get<2>(pack);
 
   // sort by column
-  std::sort(aos.begin(), aos.end(), [](auto& a, auto& b) -> bool { return (std::get<1>(a) < std::get<1>(b)); });
+  std::sort(aos.begin(), aos.end(), [](element& a, element& b) -> bool { return (std::get<1>(a) < std::get<1>(b)); });
 
   CSCMatrix A(M, N);
   A.open_for_push_back();
@@ -352,7 +356,7 @@ void write_aosmatrix(const AOSMatrix& A, std::string filename) {    // Write Me
   A.stream_coordinates(output_file);
 }
 
-auto read_mat(std::istream& input_stream) {
+void read_mat(std::istream& input_stream) {
 
   // array
 }

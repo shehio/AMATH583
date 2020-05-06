@@ -1,6 +1,6 @@
 
 
-# declare -a ALLDEFS=("-D__583")
+declare -a ALLDEFS=("-D__583")
 # declare -a ALLDEFS=("")
 
 declare -a ALLDEFS=("" "-D__583")
