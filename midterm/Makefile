@@ -18,7 +18,7 @@ PICKY           := -Wall
 
 # Leave undefined if 483, defined if 583
 # DEFS		:= 
-# DEFS		:= -D__583
+DEFS		:= -D__583
 
 
 CXXFLAGS	+= $(LANG) $(DEFS) $(OPTS) $(DEBUG) $(PROFILE) $(PICKY)

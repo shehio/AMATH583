@@ -52,11 +52,23 @@ public:
   }
 
   void matvec(const Vector& x, Vector& y) const {
-    // Write Me 
+    for(int i = 0; i < storage_.size(); i++)
+    {
+      auto row = std::get<0>(storage_[i]);
+      auto col = std::get<1>(storage_[i]);
+      auto val = std::get<2>(storage_[i]);
+      y(row) += x(col) * val;
+    }
   }
 
   void t_matvec(const Vector& x, Vector& y) const {
-    // Write Me 
+    for(int i = 0; i < storage_.size(); i++)
+    {
+      auto col = std::get<0>(storage_[i]);
+      auto row = std::get<1>(storage_[i]);
+      auto val = std::get<2>(storage_[i]);
+      y(row) += x(col) * val;
+    }
   }
 
   void matmat(const Matrix& B, Matrix& C) const {
