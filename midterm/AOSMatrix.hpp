@@ -72,7 +72,17 @@ public:
   }
 
   void matmat(const Matrix& B, Matrix& C) const {
-    // Write Me 
+    for(int i = 0; i < storage_.size(); i++)
+    {
+      auto row = std::get<0>(storage_[i]);
+      auto col = std::get<1>(storage_[i]);
+      auto val = std::get<2>(storage_[i]);
+
+      for (int j = 0; j < B.num_cols(); j++)
+      {
+        C(row, j) += val * B(col, j);
+      }
+    }
   }
 
 private:

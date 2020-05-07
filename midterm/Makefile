@@ -11,7 +11,7 @@
 CXX             := c++
 
 OPTS            := -Ofast -march=native -DNDEBUG
-#DEBUG		:= -fsanitize=address -g -O0 -fno-omit-frame-pointer
+DEBUG		:= -fsanitize=address -g -O0 -fno-omit-frame-pointer
 PROFILE		:= 
 LANG            := -std=c++11
 PICKY           := -Wall

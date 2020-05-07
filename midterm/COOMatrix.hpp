@@ -79,7 +79,12 @@ public:
   }
 
   void matmat(const Matrix& B, Matrix& C) const {
-    // Write Me 
+    for (size_t i = 0; i < storage_.size(); ++i) {
+      for (size_t j = 0; j < B.num_cols(); j++)
+      {
+        C(row_indices_[i], j) += storage_[i] * B(col_indices_[i], j);
+      }
+    }
   }
 
   void print_to_console() const{
