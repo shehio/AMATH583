@@ -91,6 +91,17 @@ public:
     }
   }
 
+  void t_matmat(const Matrix& B, Matrix& C) const {
+    for (size_t i = 0; i < num_cols_; ++i) {
+      for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
+        for (size_t k = 0; k < B.num_cols(); k++)
+        {
+          C(row_indices_[i], k) += storage_[j] * B(row_indices_[j], k);
+        }
+      }
+    }
+  }
+
 private:
   bool                is_open;
   size_t              num_rows_, num_cols_;

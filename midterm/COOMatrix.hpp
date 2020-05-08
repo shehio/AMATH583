@@ -81,6 +81,15 @@ public:
     }
   }
 
+  void t_matmat(const Matrix& B, Matrix& C) const {
+    for (size_t i = 0; i < storage_.size(); ++i) {
+      for (size_t j = 0; j < B.num_cols(); j++)
+      {
+        C(col_indices_[i], j) += storage_[i] * B(row_indices_[i], j);
+      }
+    }
+  }
+
   void print_to_console() const{
     for (int i = 0; i < num_rows(); i++)
     {

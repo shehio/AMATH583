@@ -51,6 +51,7 @@ public:
     }
   }
 
+  // mat * x'
   void matvec(const Vector& x, Vector& y) const {
     for(int i = 0; i < storage_.size(); i++)
     {
@@ -64,10 +65,9 @@ public:
   void t_matvec(const Vector& x, Vector& y) const {
     for(int i = 0; i < storage_.size(); i++)
     {
-      auto col = std::get<0>(storage_[i]);
       auto row = std::get<1>(storage_[i]);
       auto val = std::get<2>(storage_[i]);
-      y(row) += x(col) * val;
+      y(row) += x(row) * val;
     }
   }
 
@@ -81,6 +81,19 @@ public:
       for (int j = 0; j < B.num_cols(); j++)
       {
         C(row, j) += val * B(col, j);
+      }
+    }
+  }
+
+  void t_matmat(const Matrix& B, Matrix& C) const {
+    for(int i = 0; i < storage_.size(); i++)
+    {
+      auto row = std::get<0>(storage_[i]);
+      auto val = std::get<2>(storage_[i]);
+
+      for (int j = 0; j < B.num_cols(); j++)
+      {
+        C(row, j) += val * B(row, j);
       }
     }
   }
