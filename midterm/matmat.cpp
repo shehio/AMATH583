@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
   std::vector<double> ms_times(3);
 #endif
 
-  for (size_t size = 64; size <= points_max; size *= 2) {
+  for (size_t size = 1; size <= points_max; size *= 2) {
     Matrix B(size*size, nrhs), C(size*size, nrhs);
     randomize(B); randomize(C);
 

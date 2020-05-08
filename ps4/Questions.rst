@@ -30,7 +30,6 @@ res_bytes   bytes/sec
 res_bytes   bytes/sec
 262144      8.76631e+10
 524288      6.50911e+10
-        
 
 8M -> 16M
 res_bytes   bytes/sec

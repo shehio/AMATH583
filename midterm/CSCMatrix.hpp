@@ -54,13 +54,6 @@ public:
   size_t num_nonzeros() const { return storage_.size(); }
 
   void stream_coordinates(std::ostream& output_file) const { /* Write Me */
-
-    // output_file << "Writing CSC:" << std::endl;
-    // output_file << "R" << " ";
-    // output_file << "C" << " ";
-    // output_file << "V";
-    // output_file << std::endl;
-
     for (size_t i = 0; i < num_cols_; ++i) {
       for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
         output_file << row_indices_[j] << " ";
