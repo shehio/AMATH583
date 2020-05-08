@@ -31,7 +31,7 @@ double Gflops = static_cast<double>(trials)*(2.0 * N * N * N)/1.e9;
 
 You can see the striking difference in the numbers between this assignment and the previous one.
 It stems from the fact that we have the a minute numerator where nnz compared to N ** 3 in the prev assignment.
-Nonetheless, the cost of transferring and ingesting the dense matrix M to cache (inefficiently is still there).
+Nonetheless, the cost of transferring and ingesting different datastructures to cache (inefficiently is still there).
 
 How does the performance (in GFLOP/s) for sparse-matrix by vector product for COO compare to CSR?  Explain, and quantify if you can,
 (e.g., using the roofline model).
@@ -55,7 +55,20 @@ The COO size should be an upper bound to CSR and CSC storage. This might be the 
 How does the performance (in GFLOP/s) for sparse-matrix by dense matrix product (**SPMM**) compare to sparse-matrix by vector product
 (**SPMV**)? The performance for SPMM should be about the same as for SPMV in the case of a 1 column dense matrix.  What is the trend with
 increasing numbers of columns?  Explain, and quantify if you can, using the roofline model.
+Note that I added the transpose methods in matmat too.
 
+  N(Grid) N(Matrix)         NNZ    NRHS         COO       COO^T         CSR       CSR^T         CSC       CSC^T         AOS       AOS^T
+      64      4096       20224       1    0.730075    0.768277    0.815701    0.768277    0.805754    0.730075    0.937189    0.964552
+     128     16384       81408       1    0.761679    0.770536    0.833536    0.775042    0.828326    0.784214    0.939945    0.953469
+     256     65536      326656       1    0.712076    0.727472    0.796345    0.751856    0.796345    0.760352    0.715863    0.719691
+     512    262144     1308672       1    0.586459    0.622628    0.657379    0.642439    0.606595    0.636651    0.636651    0.645372
+    1024   1048576     5238784       1    0.594472    0.607395    0.662613    0.611829    0.637419    0.574113    0.546062    0.537311
+    2048   4194304    20963328       1    0.533612    0.494918    0.625771    0.617867    0.652192    0.600177    0.590516    0.625771
+
+The Gflops seem to be slightly less than the corresponding ones in matvec. We can probably see that the most efficient ones are CSR and AOS^T.
+If we focus on AOS (since it's easy to analyz; 3 entries per non zero element). We can see that for N = 64. There's a dense matrix of 4096x1 and a sparse one which is of capacity = 3x20224 (again 3 for storage). Now, putting all the memory usage together: 84992. Each of these, take 8 bytes. So 84992 * 8 = 679936 = 664K, which is already more than the L1 cache on my machine (32K).
+
+The Gflops for this problem peaks at 1, which shows that this problem is memory-bound and not cpu-bound. It seems that a lot of work is being done to get the data ready for the CPU.
 
 How does the performance of sparse matrix by dense matrix product (in GFLOP/s) compare to the results you got dense matrix-matrix product in
 previous assignments?  Explain, and quantify if you can, using the roofline model.
@@ -65,11 +78,5 @@ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC       
     256     65536      326656       1     0.54267    0.704619    0.777932    0.666249
 
 
-Some additional work.
- N(Grid) N(Matrix)         NNZ    NRHS         COO       COO^T         CSR       CSR^T         CSC       CSC^T         AOS       AOS^T
-      64      4096       20224      10     2.30135     2.61722      3.0336     2.26235      2.9017     2.83997      3.0336      3.0336
-     128     16384       81408      10     2.47131     2.51625     2.94454     2.23215     2.76787     2.82436     3.00856     3.00856
-     256     65536      326656      10      2.0363     2.06309     2.27239     1.84465     2.30581     2.48881     2.34022     2.37568
-     512    262144     1308672      10      1.9795     1.99628     2.22227     1.82605     2.16111     2.26501     2.22227     2.35561
-    1024   1048576     5238784      10     1.95477     1.95477     2.21046      1.7009     2.14704      2.2581     2.21982     2.35981
-    2048   4194304    20963328      10      1.9388      1.9569     2.21834      1.8033     2.17518     2.26325     2.16396     2.31001
+Experiment with some of the optimizations we developed previously in the course for matrix-matrix product and apply them to sparse-matrix by dense-matrix product.
+Added the transpose methods in matmat too.
