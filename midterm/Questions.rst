@@ -29,9 +29,7 @@ double Gflops = static_cast<double>(trials)*(2.0 * nnz)/1.e9;
 Compare it with the Gflops from the previous assignments.
 double Gflops = static_cast<double>(trials)*(2.0 * N * N * N)/1.e9;
 
-You can see the striking difference in the numbers between this assignment and the previous one.
-It stems from the fact that we have the a minute numerator where nnz compared to N ** 3 in the prev assignment.
-Nonetheless, the cost of transferring and ingesting different datastructures to cache (inefficiently is still there).
+You can see the striking difference in the numbers between this assignment and the previous one. It stems from the fact that we have the a minute numerator, nnz, compared to N ** 3 in the prev assignment. Nonetheless, the cost of transferring and ingesting different datastructures to the registers and cache (inefficiently is still there).
 
 How does the performance (in GFLOP/s) for sparse-matrix by vector product for COO compare to CSR?  Explain, and quantify if you can,
 (e.g., using the roofline model).
@@ -48,14 +46,16 @@ How does the performance (in GFLOP/s) for sparse-matrix by vector product for CO
     1024   1048576     5238784    0.960096     1.38497
     2048   4194304    20963328    0.936909     1.37464
 
-We can see that the max Gflops occur in both alogirthms at around N = 16. Note that the number N is deceiving since the vector's length is (NxN)x1 and the size of the matrix is (NxN)x(NxN). That being said, most of the entries are zeros, so the only Non zeros are 1216 items. Although, the 1216 x 8 bytes for doubles = 9.5 KB, we have to add the rows and cols for COOs. This makes COO's storage = 9.5 * 3 = 28.5 KB. Although this is still less than my L1 cache (from prev assignments), there's no gurantee that the tool chain will cache the whole three vectors. This makes it a little less efficient, but still incredibly efficient when it comes to the numbers of item being processed.
+We can see that the max Gflops occur in both alogirthms at around N = 16. Note that the number N is deceiving since the vector's length is (NxN)x1 and the size of the matrix is (NxN)x(NxN). That being said, since most entries are zeros, we only have 1216 items.
+
+Now, let's caculate the storage for that. For COOs, there are three arrays, for values, rows, and cols. This becomes 3 x 1216 x 8 bytes for doubles = 28.5 KB. Although this is still less than my L1 cache (from prev assignments), there's no gurantee that the tool chain will cache the whole three vectors. This makes it a little less efficient, but still incredibly efficient when it comes to the numbers of item being processed.
 
 The COO size should be an upper bound to CSR and CSC storage. This might be the reason CSR is 30% faster (2.66677 / 1.96086 - 1) when it comes to the roofline model.
 
 How does the performance (in GFLOP/s) for sparse-matrix by dense matrix product (**SPMM**) compare to sparse-matrix by vector product
 (**SPMV**)? The performance for SPMM should be about the same as for SPMV in the case of a 1 column dense matrix.  What is the trend with
 increasing numbers of columns?  Explain, and quantify if you can, using the roofline model.
-Note that I added the transpose methods in matmat too.
+Note that I added the transpose methods in matmat too in this experiment.
 
   N(Grid) N(Matrix)         NNZ    NRHS         COO       COO^T         CSR       CSR^T         CSC       CSC^T         AOS       AOS^T
       64      4096       20224       1    0.730075    0.768277    0.815701    0.768277    0.805754    0.730075    0.937189    0.964552
@@ -66,17 +66,44 @@ Note that I added the transpose methods in matmat too.
     2048   4194304    20963328       1    0.533612    0.494918    0.625771    0.617867    0.652192    0.600177    0.590516    0.625771
 
 The Gflops seem to be slightly less than the corresponding ones in matvec. We can probably see that the most efficient ones are CSR and AOS^T.
-If we focus on AOS (since it's easy to analyz; 3 entries per non zero element). We can see that for N = 64. There's a dense matrix of 4096x1 and a sparse one which is of capacity = 3x20224 (again 3 for storage). Now, putting all the memory usage together: 84992. Each of these, take 8 bytes. So 84992 * 8 = 679936 = 664K, which is already more than the L1 cache on my machine (32K).
+If we focus on AOS (since it's easy to analyz; 3 entries per non zero element). We can see that for N = 64. There's a dense matrix of 4096x1 and a sparse one which is of capacity = 3x20224 (again 3 for row, col, and value). Now, putting all the memory usage together: 84992. Each of these, take 8 bytes. So 84992 * 8 = 679936 = 664K, which is already more than the L1 cache on my machine (32K).
 
 The Gflops for this problem peaks at 1, which shows that this problem is memory-bound and not cpu-bound. It seems that a lot of work is being done to get the data ready for the CPU.
+
+Comparing it with cols = 10
+ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC         AOS
+      64      4096       20224      10     2.22464      3.0336     2.83997     3.10415
+     128     16384       81408      10     2.51625     2.94454     2.82436     3.07541
+     256     65536      326656      10     2.23993     2.48881     2.48881     2.34022
+     512    262144     1308672      10     2.01334     2.26501     2.18112       2.287
+    1024   1048576     5238784      10     1.91196     2.19196     2.12959     2.27773
+    2048   4194304    20963328      10      1.9569     2.24207     2.09372     2.21834
+
+And cols = 100
+N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC         AOS
+      64      4096       20224     100     6.61876     8.56546     8.56546     9.70752
+     128     16384       81408     100     5.92058     5.92058     5.58226      6.1056
+     256     65536      326656     100     5.59982     5.59982     5.36969     5.85056
+     512    262144     1308672     100     5.28756     5.65912     5.28756     5.88167
+    1024   1048576     5238784     100     5.21272     5.52906     5.15502     5.74901
+    2048   4194304    20963328     100     4.16766     5.10522      4.5523     4.05578
+
+We can see the increase in efficiency with the increase in number of columns (before it decreases again for higher columns). This might be because for smaller columns, there's more overhead then there's computations. While for an adquate number of columns, say 100, the overhead can becomes small compared to all the computations. When we speak of overhead, we mean memory, and how compiler deals with it.
 
 How does the performance of sparse matrix by dense matrix product (in GFLOP/s) compare to the results you got dense matrix-matrix product in
 previous assignments?  Explain, and quantify if you can, using the roofline model.
 Refer to the data at the top of the page for the data from dense matrix-matrix product.
-N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC         AOS
-    128     16384       81408       1    0.625152    0.895488    0.907755    0.926799
-    256     65536      326656       1     0.54267    0.704619    0.777932    0.666249
+ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC         AOS
+     128     16384       81408     100     5.92058     5.92058     5.58226      6.1056
+     256     65536      326656     100     5.59982     5.59982     5.36969     5.85056
 
+It seems that the maximum of Gflops we're getting from sparse matrices is 6. This doesn't fare well with the denses' numbers we've shown in the top of the file. It seems that, even though it's a great idea to not store zeros, we will have to store additional indexing information. This information makes computation less efficient due to the slow nature of memory. I think our toolbox needs an additional metric: How many useful computation can we get when we compare dense matrix to sparse ones; meaning how many real multiplication do we need to do in dense matrices, i.e. ones that are not zeros to begin with.
+
+Any additonal check will have the perf monitoring go up so, we have to do this manually without relyin on the code to count the number of zero entries for us in the dense matrix.
 
 Experiment with some of the optimizations we developed previously in the course for matrix-matrix product and apply them to sparse-matrix by dense-matrix product.
-Added the transpose methods in matmat too.
+Added the transpose methods in matmat too. As I tried them, they didn't give a great improvement.
+
+Answer the following questions:
+a) The most important thing I learned from this assignment was implementing sparse matrices.
+b) One thing I am still not clear on is what are we going to do with them? Not clear on the big picture. I also would have imagined that sparse matrices would do better than dense matrices.

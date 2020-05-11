@@ -29,14 +29,10 @@ void header(const std::string& msg = "") {
   os_ << std::setw(12) << std::right << "NNZ";
   os_ << std::setw(8) << std::right << "NRHS";
   os_ << std::setw(12) << std::right << "COO";
-  os_ << std::setw(12) << std::right << "COO^T";
   os_ << std::setw(12) << std::right << "CSR";
-  os_ << std::setw(12) << std::right << "CSR^T";
   os_ << std::setw(12) << std::right << "CSC";
-  os_ << std::setw(12) << std::right << "CSC^T";
 #ifdef __583
   os_ << std::setw(12) << std::right << "AOS";
-  os_ << std::setw(12) << std::right << "AOS^T";
 #endif
   os_ << std::endl;
 }
@@ -88,7 +84,7 @@ int main(int argc, char* argv[]) {
   Timer t;
 
 #ifdef __583
-  std::vector<double> ms_times(8);
+  std::vector<double> ms_times(4);
 #else
   std::vector<double> ms_times(3);
 #endif
@@ -105,70 +101,43 @@ int main(int argc, char* argv[]) {
 
     t.start(); 
     for (size_t i = 0; i < ntrials; ++i) {
-     ACOO.matmat(B, C);
+      mult(ACOO, B, C);
     }
     t.stop();
     ms_times[0] = t.elapsed();
-
-    t.start(); 
-    for (size_t i = 0; i < ntrials; ++i) {
-      ACOO.t_matmat(B, C);
-    }
-    t.stop();
-    ms_times[1] = t.elapsed();
     
     CSRMatrix ACSR(size*size, size*size);
     piscetize(ACSR, size, size);
     t.start(); 
     for (size_t i = 0; i < ntrials; ++i) {
-      ACSR.matmat(B, C);
+      mult(ACSR, B, C);
     }
     t.stop();
-    ms_times[2] = t.elapsed();
-
-    t.start(); 
-    for (size_t i = 0; i < ntrials; ++i) {
-      ACSR.t_matmat(B, C);
-    }
-    t.stop();
-    ms_times[3] = t.elapsed();
+    ms_times[1] = t.elapsed();
     
     CSCMatrix ACSC(size*size, size*size);
     piscetize(ACSC, size, size);
     t.start(); 
     for (size_t i = 0; i < ntrials; ++i) {
-      ACSC.matmat(B, C);
+      mult(ACSC, B, C);
     }
     t.stop();
-    ms_times[4] = t.elapsed();
-
-    t.start(); 
-    for (size_t i = 0; i < ntrials; ++i) {
-      ACSC.t_matmat(B, C);
-    }
-    t.stop();
-    ms_times[5] = t.elapsed();
+    ms_times[2] = t.elapsed();
 
 #ifdef __583
     AOSMatrix AAOS(size*size, size*size);
     piscetize(AAOS, size, size);
     t.start(); 
     for (size_t i = 0; i < ntrials; ++i) {
-      AAOS.matmat(B, C);
+      mult(AAOS, B, C);
     }
     t.stop();
-    ms_times[6] = t.elapsed();
-
-    t.start(); 
-    for (size_t i = 0; i < ntrials; ++i) {
-      AAOS.t_matmat(B, C);
-    }
-    t.stop();
-    ms_times[7] = t.elapsed();
+    ms_times[3] = t.elapsed();
 #endif
 
     log(size, nnz, nrhs, ntrials, ms_times);
   }
+
 
   return 0;
 }
