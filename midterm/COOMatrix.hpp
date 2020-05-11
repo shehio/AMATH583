@@ -83,9 +83,9 @@ public:
 
   void t_matmat(const Matrix& B, Matrix& C) const {
     for (size_t i = 0; i < storage_.size(); ++i) {
-      for (size_t j = 0; j < B.num_cols(); j++)
+      for (size_t j = 0; j < B.num_rows(); j++)
       {
-        C(col_indices_[i], j) += storage_[i] * B(row_indices_[i], j);
+        C(j, col_indices_[i]) +=  B(j, row_indices_[i]) * storage_[i];
       }
     }
   }
