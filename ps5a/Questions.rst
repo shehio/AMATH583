@@ -1,4 +1,5 @@
-
+line 56: std::cout << "Double checking Clyde's deposit " << clyde.get() << std::endl;
+A future can only be queried once. Preventing it from being queried twice because it might give the consumer of it th efalse impression that the task has run twice.
 
 - At what problem size do the answers between the computed norms start to differ?
 

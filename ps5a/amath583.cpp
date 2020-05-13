@@ -61,20 +61,19 @@ double two_norm(const Vector& x) {
 }
 
 double two_norm_r(const Vector& x) {
-  // Fix me so I sum in reverse order
   double sum = 0.0;
-  for (size_t i = 0; i < x.num_rows(); ++i) {
+  for (int i = x.num_rows() - 1; i >= 0 ; i--) {
     sum += x(i) * x(i);
   }
   return std::sqrt(sum);
 }
 
 double two_norm_s(const Vector& x) {
-  // Fix me so I sum up the values in x in sorted order 
-  // See std::sort
+  auto y = x;
+  y.sort();
   double sum = 0.0;
   for (size_t i = 0; i < x.num_rows(); ++i) {
-    sum += x(i) * x(i);
+    sum += y(i) * y(i);
   }
   return std::sqrt(sum);
 }

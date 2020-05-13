@@ -21,6 +21,8 @@ public:
   double&       operator()(size_t i) { return storage_[i]; }
   const double& operator()(size_t i) const { return storage_[i]; }
 
+  void sort(){ std::sort(begin(storage_), end(storage_)); }
+
   size_t num_rows() const { return num_rows_; }
 
 private:
