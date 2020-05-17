@@ -20,6 +20,8 @@
 #include <vector>
 
 // Any additional includes go here
+#include <future>
+#include <thread>
 
 class CSRMatrix {
 public:
@@ -72,11 +74,29 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  void matvec(const Vector& x, Vector& y, size_t threads_count) const {
-    for (size_t i = 0; i < num_rows_; ++i) {
-      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
-        y(i) += storage_[j] * x(col_indices_[j]);
-      }
+  static double add_row(const Vector& x,  size_t i, std::vector<size_t> row_indices_, std::vector<size_t> col_indices_, std::vector<double> storage_)
+  {
+    auto ret = 0.0;
+    for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j)
+    {
+         ret += storage_[j] * x(col_indices_[j]);
+    }
+    return ret;
+  }
+
+  void matvec(const Vector& x, Vector& y, size_t tasks_count) const
+  {
+    std::vector<std::future<double>> futures;
+    int blocks = num_rows_ / tasks_count;
+
+    for (size_t i = 0; i < num_rows_; ++i)
+    {
+      futures.push_back(std::async(std::launch::any, &CSRMatrix::add_row, std::cref(x), i, row_indices_, col_indices_, storage_));
+    }
+
+    for (size_t i = 0; i < futures.size(); ++i) 
+    {
+      y(i) += futures[i].get();
     }
   }
 
