@@ -27,19 +27,46 @@
 // Write us
 double worker_a(const Vector& x, size_t begin, size_t end) {
   double sum_of_squares = 0.0;
+  for (size_t i = begin; i < end; ++i) {
+    sum_of_squares += x(i) * x(i);
+  }
   return sum_of_squares;
+}
+
+double partitioned_two_norm_common(const Vector& x, size_t partitions, bool deffered) {
+    double sum = 0.0;
+  std::vector<std::future<double>> futures;
+  size_t blocksize = x.num_rows() / partitions;
+
+  for (size_t i = 0; i < partitions; ++i)
+  {
+    if (!deffered)
+    {
+      futures.push_back(std::async(std::launch::async, worker_a, std::cref(x), i * blocksize, (i + 1) * blocksize));
+    }
+    else
+    {
+      futures.push_back(std::async(std::launch::deferred, worker_a, std::cref(x), i * blocksize, (i + 1) * blocksize));
+    }
+    
+  }
+
+  for (size_t i = 0; i < partitions; ++i)
+  {
+    sum += futures[i].get();
+  }
+
+  return std::sqrt(sum);
 }
 
 // Write us
 double partitioned_two_norm_a(const Vector& x, size_t partitions) {
-  double sum = 0.0;
-  return std::sqrt(sum);
+  return partitioned_two_norm_common(x, partitions, false);
 }
 
 // Write us
 double partitioned_two_norm_b(const Vector& x, size_t partitions) {
-  double sum = 0.0;
-  return std::sqrt(sum);
+  return partitioned_two_norm_common(x, partitions, true);
 }
 
 #endif    // AMATH_583_FNORM_HPP
