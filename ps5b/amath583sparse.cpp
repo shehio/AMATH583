@@ -170,8 +170,8 @@ Vector mult(const Vector& x, const CSRMatrix& A, size_t parts) {
   return y;
 }
 
-void mult(const CSRMatrix& A, const Vector& x, Vector& y, size_t parts) { A.matvec(x, y); }      // Fix me (maybe)
-void mult(const Vector& x, const CSRMatrix& A, Vector& y, size_t parts) { A.t_matvec(x, y); }    // Fix me (maybe)
+void mult(const CSRMatrix& A, const Vector& x, Vector& y, size_t parts) { A.matvec(x, y, parts); }
+void mult(const Vector& x, const CSRMatrix& A, Vector& y, size_t parts) { A.t_matvec(x, y, parts); }
 
 // ----------------------------------------------------------------
 //
@@ -248,8 +248,8 @@ Vector mult(const Vector& x, const CSCMatrix& A, size_t parts) {
   return y;
 }
 
-void mult(const CSCMatrix& A, const Vector& x, Vector& y, size_t parts) { A.matvec(x, y); }      // Fix me (maybe)
-void mult(const Vector& x, const CSCMatrix& A, Vector& y, size_t parts) { A.t_matvec(x, y); }    // Fix me (maybe)
+void mult(const CSCMatrix& A, const Vector& x, Vector& y, size_t parts) { A.matvec(x, y, parts); }
+void mult(const Vector& x, const CSCMatrix& A, Vector& y, size_t parts) { A.t_matvec(x, y, parts); }
 
 // ----------------------------------------------------------------
 //

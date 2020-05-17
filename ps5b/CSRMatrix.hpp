@@ -72,6 +72,22 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
+  void matvec(const Vector& x, Vector& y, size_t threads_count) const {
+    for (size_t i = 0; i < num_rows_; ++i) {
+      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
+        y(i) += storage_[j] * x(col_indices_[j]);
+      }
+    }
+  }
+
+  void t_matvec(const Vector& x, Vector& y, size_t threads_count) const {
+    for (size_t i = 0; i < num_rows_; ++i) {
+      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
+        y(col_indices_[j]) += storage_[j] * x(i);
+      }
+    }
+  }
+
   void matvec(const Vector& x, Vector& y) const {
     for (size_t i = 0; i < num_rows_; ++i) {
       for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
@@ -88,7 +104,7 @@ public:
     }
   }
 
-  void matmat(const Matrix& B, Matrix& C) const { /* Write Me */
+  void matmat(const Matrix& B, Matrix& C) const {
     for (size_t i = 0; i < num_rows_; ++i) {
       for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
         for (size_t k = 0; k < B.num_cols(); ++k) {
