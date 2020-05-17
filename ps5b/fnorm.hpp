@@ -24,7 +24,6 @@
 #include <string>
 #include <thread>
 
-// Write us
 double worker_a(const Vector& x, size_t begin, size_t end) {
   double sum_of_squares = 0.0;
   for (size_t i = begin; i < end; ++i) {
@@ -59,12 +58,10 @@ double partitioned_two_norm_common(const Vector& x, size_t partitions, bool deff
   return std::sqrt(sum);
 }
 
-// Write us
 double partitioned_two_norm_a(const Vector& x, size_t partitions) {
   return partitioned_two_norm_common(x, partitions, false);
 }
 
-// Write us
 double partitioned_two_norm_b(const Vector& x, size_t partitions) {
   return partitioned_two_norm_common(x, partitions, true);
 }

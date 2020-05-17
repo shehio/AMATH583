@@ -24,9 +24,30 @@
 #include <string>
 #include <thread>
 
+double worker_a(const Vector& x, int start, int stride) {
+  double sum_of_squares = 0.0;
+  for (size_t i = start; i < x.num_rows(); i = i + stride) {
+    sum_of_squares += x(i) * x(i);
+  }
+  return sum_of_squares;
+}
+
+
 // Write me
 double cyclic_two_norm(const Vector& x, size_t partitions) {
   double sum = 0.0;
+  std::vector<std::future<double>> futures;
+
+  // strides = partitions
+  for (size_t i = 0; i < partitions; ++i)
+  {
+    futures.push_back(std::async(std::launch::async, worker_a, std::cref(x), i, partitions));    
+  }
+
+  for (size_t i = 0; i < partitions; ++i)
+  {
+    sum += futures[i].get();
+  }
 
   return std::sqrt(sum);
 }
