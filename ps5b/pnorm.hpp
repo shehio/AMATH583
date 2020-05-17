@@ -16,6 +16,7 @@
 #include "amath583.hpp"
 #include "norm_utils.hpp"
 
+#include <atomic>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -25,11 +26,20 @@
 #include <string>
 #include <thread>
 
+std::mutex mtx;           // mutex for critical section
+
 // Fix us
 void worker_a(const Vector& x, size_t begin, size_t end, double& partial) {
+  std::unique_lock<std::mutex> lck (mtx,std::defer_lock);
+  auto local_partial = 0.0;
+
   for (size_t i = begin; i < end; ++i) {
-    partial += x(i) * x(i);
+    local_partial += x(i) * x(i);
   }
+
+  lck.lock();
+  partial += local_partial;
+  lck.unlock();
 }
 
 // Fix us
