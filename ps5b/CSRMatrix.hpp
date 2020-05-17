@@ -74,30 +74,64 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  static double add_row(const Vector& x,  size_t i, std::vector<size_t> row_indices_, std::vector<size_t> col_indices_, std::vector<double> storage_)
+  static std::vector<double> matvec_task(
+    const Vector& x,
+    size_t start,
+    size_t end,
+    std::vector<size_t> row_indices_,
+    std::vector<size_t> col_indices_,
+    std::vector<double> storage_)
   {
-    auto ret = 0.0;
-    for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j)
+    std::vector<double> ret(end - start);
+    for (size_t i = start; i < end; i++)
     {
-         ret += storage_[j] * x(col_indices_[j]);
+      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j)
+      {
+         ret[i - start] += storage_[j] * x(col_indices_[j]);
+      }
     }
+    
     return ret;
   }
 
   void matvec(const Vector& x, Vector& y, size_t tasks_count) const
   {
-    std::vector<std::future<double>> futures;
-    int blocks = num_rows_ / tasks_count;
+    std::vector<std::future<std::vector<double> > > futures;
+    int blocksize = num_rows_ / tasks_count;
 
-    for (size_t i = 0; i < num_rows_; ++i)
+    std::cout << "Block Size: " << blocksize << std::endl;
+
+    for (int i = 0; i < tasks_count; i++)
     {
-      futures.push_back(std::async(std::launch::any, &CSRMatrix::add_row, std::cref(x), i, row_indices_, col_indices_, storage_));
+      futures.push_back(std::async(
+        std::launch::any,
+        &CSRMatrix::matvec_task,
+        std::cref(x),
+        i * blocksize,
+        (i + 1) * blocksize,
+        row_indices_,
+        col_indices_,
+        storage_));
     }
 
     for (size_t i = 0; i < futures.size(); ++i) 
     {
-      y(i) += futures[i].get();
+      auto vec = futures[i].get();
+      for (size_t j = 0; j < vec.size(); j++)
+      {
+        y(i * blocksize + j) += vec[j];
+      }
     }
+  }
+
+  static std::vector<double> t_matvec_task(
+    const Vector& x,
+    size_t start,
+    size_t end,
+    std::vector<size_t> row_indices_,
+    std::vector<size_t> col_indices_,
+    std::vector<double> storage_)
+  {
   }
 
   void t_matvec(const Vector& x, Vector& y, size_t threads_count) const {
