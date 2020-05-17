@@ -33,23 +33,35 @@ double sum_of_squares(const Vector& x, size_t begin, size_t end) {
   return sum;
 }
 
-// Write me
-double recursive_worker_a(const Vector& x, size_t begin, size_t end, size_t level) { return 0.0; }
+double recursive_worker(const Vector& x, size_t begin, size_t end, size_t level, std::launch launch_policy)
+{
+  if (level == 4)
+  {
+    return sum_of_squares(x, begin, end);
+  }
+
+  double sum = 0.0;
+  std::vector<std::future<double>> futures;
+  futures.push_back(std::async(launch_policy, recursive_worker, std::cref(x), begin, (begin + end) / 2, level + 1, launch_policy));
+  futures.push_back(std::async(launch_policy, recursive_worker, std::cref(x), (begin + end) / 2, end, level + 1, launch_policy));
+
+  for (size_t i = 0; i < futures.size(); ++i)
+  {
+    sum += futures[i].get();
+  }
+
+  return sum;
+}
 
 // Dispatch to the actual recursive function -- start with 0 and num_rows() as begin and end
 double recursive_two_norm_a(const Vector& x, size_t levels) {
-  double sum = recursive_worker_a(std::cref(x), 0, x.num_rows(), levels);
-
+  double sum = recursive_worker(std::cref(x), 0, x.num_rows(), levels, std::launch::async);
   return std::sqrt(sum);
 }
 
-// Write me
-double recursive_worker_b(const Vector& x, size_t begin, size_t end, size_t level) { return 0.0; }
-
 // Dispatch to the actual recursive function -- start with 0 and num_rows() as begin and end
 double recursive_two_norm_b(const Vector& x, size_t levels) {
-  double sum = recursive_worker_b(std::cref(x), 0, x.num_rows(), levels);
-
+  double sum = recursive_worker(std::cref(x), 0, x.num_rows(), levels, std::launch::deferred);
   return std::sqrt(sum);
 }
 
