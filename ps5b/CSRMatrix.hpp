@@ -21,6 +21,7 @@
 
 // Any additional includes go here
 #include <future>
+#include <thread>
 
 class CSRMatrix {
 public:
@@ -73,57 +74,38 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  std::vector<double> matvec_task(
-    const Vector& x,
-    size_t start,
-    size_t end,
-    std::vector<size_t> row_indices_,
-    std::vector<size_t> col_indices_,
-    std::vector<double> storage_)
+  void matvec_task(const Vector& x, Vector& y, size_t start, size_t end)
   {
-    std::vector<double> ret(end - start);
     for (size_t i = start; i < end; i++)
     {
       for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j)
       {
-         ret[i - start] += storage_[j] * x(col_indices_[j]);
+         y(i) += storage_[j] * x(col_indices_[j]);
       }
     }
-    
-    return ret;
   }
   
-  void matvec(const Vector& x, Vector& y, size_t tasks_count) const
+  void matvec(const Vector& x, Vector& y, size_t partitions) const
   {
-    std::vector<std::future<std::vector<double > > > futures;
+    std::vector<std::thread> threads;
+    size_t blocksize = num_rows_ / partitions;
 
-    int blocksize = num_rows_ / tasks_count;
-
-    // std::cout << "num_rows: " << num_rows_ << std::endl;
-    // std::cout << "tasks_count: " << tasks_count << std::endl;
-    // std::cout << "Block Size: " << blocksize << std::endl;
-
-    for (int i = 0; i < tasks_count; i++)
+    for (size_t i = 0; i < partitions; ++i)
     {
-      futures.push_back(std::async(
-        std::launch::async,
-        &CSRMatrix::matvec_task,
-        *this,
-        std::cref(x),
-        i * blocksize,
-        (i + 1) * blocksize,
-        row_indices_,
-        col_indices_,
-        storage_));
+      threads.push_back(std::thread(&CSRMatrix::matvec_task, *this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize));
     }
 
-    for (size_t i = 0; i < futures.size(); ++i) 
+    for (size_t i = 0; i < partitions; ++i) {
+      threads[i].join();
+    }
+  }
+
+  void matvec_async_impl(const Vector& x, Vector& y, size_t partitions) const
+  {
+    size_t blocksize = num_rows_ / partitions;
+    for (int i = 0; i < partitions; i++)
     {
-      auto vec = futures[i].get();
-      for (size_t j = 0; j < vec.size(); j++)
-      {
-        y(i * blocksize + j) += vec[j];
-      }
+      std::async(std::launch::async, &CSRMatrix::matvec_task, *this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize);
     }
   }
 
