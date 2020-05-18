@@ -73,7 +73,7 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  static std::vector<double> matvec_task(
+  std::vector<double> matvec_task(
     const Vector& x,
     size_t start,
     size_t end,
@@ -92,10 +92,10 @@ public:
     
     return ret;
   }
-
+  
   void matvec(const Vector& x, Vector& y, size_t tasks_count) const
   {
-    std::vector<std::future<std::vector<double> > > futures;
+    std::vector<std::future<std::vector<double > > > futures;
 
     int blocksize = num_rows_ / tasks_count;
 
@@ -108,6 +108,7 @@ public:
       futures.push_back(std::async(
         std::launch::async,
         &CSRMatrix::matvec_task,
+        *this,
         std::cref(x),
         i * blocksize,
         (i + 1) * blocksize,
