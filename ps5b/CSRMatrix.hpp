@@ -21,7 +21,6 @@
 
 // Any additional includes go here
 #include <future>
-#include <thread>
 
 class CSRMatrix {
 public:
@@ -97,14 +96,17 @@ public:
   void matvec(const Vector& x, Vector& y, size_t tasks_count) const
   {
     std::vector<std::future<std::vector<double> > > futures;
+
     int blocksize = num_rows_ / tasks_count;
 
-    std::cout << "Block Size: " << blocksize << std::endl;
+    // std::cout << "num_rows: " << num_rows_ << std::endl;
+    // std::cout << "tasks_count: " << tasks_count << std::endl;
+    // std::cout << "Block Size: " << blocksize << std::endl;
 
     for (int i = 0; i < tasks_count; i++)
     {
       futures.push_back(std::async(
-        std::launch::any,
+        std::launch::async,
         &CSRMatrix::matvec_task,
         std::cref(x),
         i * blocksize,
@@ -122,16 +124,6 @@ public:
         y(i * blocksize + j) += vec[j];
       }
     }
-  }
-
-  static std::vector<double> t_matvec_task(
-    const Vector& x,
-    size_t start,
-    size_t end,
-    std::vector<size_t> row_indices_,
-    std::vector<size_t> col_indices_,
-    std::vector<double> storage_)
-  {
   }
 
   void t_matvec(const Vector& x, Vector& y, size_t threads_count) const {

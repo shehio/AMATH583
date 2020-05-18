@@ -17,6 +17,7 @@
 #include <vector>
 
 // Any additional includes go here
+#include <future>
 
 class CSCMatrix {
 public:
@@ -69,18 +70,48 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  void matvec(const Vector& x, Vector& y, size_t threads_count) const {
-    for (size_t i = 0; i < num_cols_; ++i) {
+  static std::vector<double> t_matvec_task(
+    const Vector& x,
+    size_t start,
+    size_t end,
+    std::vector<size_t> row_indices_,
+    std::vector<size_t> col_indices_,
+    std::vector<double> storage_)
+  {
+    std::vector<double> ret(end - start);
+    for (size_t i = start; i < end; i++)
+    {
       for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
-        y(row_indices_[j]) += storage_[j] * x(i);
+        ret[i - start] += storage_[j] * x(row_indices_[j]);
       }
     }
+    
+    return ret;
   }
 
-  void t_matvec(const Vector& x, Vector& y, size_t threads_count) const {
-    for (size_t i = 0; i < num_cols_; ++i) {
-      for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
-        y(i) += storage_[j] * x(row_indices_[j]);
+  void t_matvec(const Vector& x, Vector& y, size_t tasks_count) const {
+    std::vector<std::future<std::vector<double> > > futures;
+    int blocksize = num_rows_ / tasks_count;
+
+    for (int i = 0; i < tasks_count; i++)
+    {
+      futures.push_back(std::async(
+        std::launch::any,
+        &CSCMatrix::t_matvec_task,
+        std::cref(x),
+        i * blocksize,
+        (i + 1) * blocksize,
+        row_indices_,
+        col_indices_,
+        storage_));
+    }
+
+    for (size_t i = 0; i < futures.size(); ++i) 
+    {
+      auto vec = futures[i].get();
+      for (size_t j = 0; j < vec.size(); j++)
+      {
+        y(i * blocksize + j) += vec[j];
       }
     }
   }
