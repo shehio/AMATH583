@@ -4,3 +4,4 @@
 *.exe
 *.bmp
 train-images.idx3-ubyte
+ps5b/data/

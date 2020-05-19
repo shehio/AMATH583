@@ -75,6 +75,21 @@ rnorm
 -----
 
 * How much parallel speedup do you see for 1, 2, 4, and 8 threads?
+           N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
+     1048576     2.41825      5.1311     2.50826     3.02643     2.39533             0   1.92318e-16             0   1.92318e-16
+     2097152     2.65821     3.84741     3.08256     2.40237     2.68612   5.43881e-16   4.07911e-16   9.51792e-16   5.43881e-16
+     4194304     3.66635     4.51972     2.94544     2.76669     3.22639    9.6159e-16   1.92318e-16   5.76954e-16   3.84636e-16
+     8388608     3.54065     4.31035     3.52919     2.96337     3.26503    1.3595e-16   5.43801e-16             0             0
+    16777216     3.85051     3.86317     3.41397      3.5588     3.23528   3.84567e-16   1.34599e-15   1.92284e-16             0
+    33554432     2.80204     4.12978     3.52278     3.35544     3.77016   7.20652e-15   7.61444e-15   6.66264e-15   6.93458e-15
+
+           N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
+     1048576     4.26509     4.79065     6.52147     6.01683     5.46393   1.15258e-15   1.53677e-15   1.34467e-15   1.34467e-15
+     2097152     4.07733     3.92111     4.24652     3.74876      4.1943   2.71928e-15   2.03946e-15   2.03946e-15    1.9035e-15
+     4194304     3.85506     3.67921     3.67921     3.51871     3.74491   9.61294e-16   1.92259e-16             0   3.84518e-16
+     8388608     3.59907     3.45101     3.63506     3.47299     3.41855   1.49582e-15   1.08787e-15   5.43933e-16   1.35983e-16
+    16777216     3.53736     3.52674     3.43393     3.40407      3.5588   5.00099e-15   4.03926e-15   3.84691e-15    4.2316e-15
+    33554432     3.70767     3.48617     3.46816     3.59833     3.43268   3.67179e-15   4.62374e-15   5.57568e-15   4.35175e-15
 
 * What will happen if you use ``std:::launch::deferred`` instead of ``std:::launch::async`` when launching tasks?  When will the computations happen?  Will you see any speedup?  For your convenience, the driver program will also call ``recursive_two_norm_b`` -- which you can implement as a copy of ``recursive_two_norm_a`` but with the launch policy changed.
 

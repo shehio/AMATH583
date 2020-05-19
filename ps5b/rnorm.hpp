@@ -36,15 +36,15 @@ double sum_of_squares(const Vector& x, size_t begin, size_t end) {
 double recursive_worker(const Vector& x, size_t begin, size_t end, size_t level, std::launch launch_policy)
 {
   // Decided based on empircal evidence.
-  if (level == 4)
+  if (level == 0)
   {
     return sum_of_squares(x, begin, end);
   }
 
   double sum = 0.0;
   std::vector<std::future<double>> futures;
-  futures.push_back(std::async(launch_policy, recursive_worker, std::cref(x), begin, (begin + end) / 2, level + 1, launch_policy));
-  futures.push_back(std::async(launch_policy, recursive_worker, std::cref(x), (begin + end) / 2, end, level + 1, launch_policy));
+  futures.push_back(std::async(launch_policy, recursive_worker, std::cref(x), begin, (begin + end) / 2, level - 1, launch_policy));
+  futures.push_back(std::async(launch_policy, recursive_worker, std::cref(x), (begin + end) / 2, end, level - 1, launch_policy));
 
   for (size_t i = 0; i < futures.size(); ++i)
   {

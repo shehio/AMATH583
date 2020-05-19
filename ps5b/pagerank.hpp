@@ -34,7 +34,7 @@ Vector pagerank(const CSRMatrix& P, double alpha, double tol = 1.e-4, size_t max
 
   for (size_t i = 0; i < max_iters; ++i) {
 
-    Vector y = mult(x, P);    // Parallelize me
+    Vector y = mult(x, P, num_threads);    // Parallelize me
 
     y *= alpha;
 
