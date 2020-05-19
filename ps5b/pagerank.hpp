@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-Vector pagerank(const CSRMatrix& P, double alpha, double tol = 1.e-4, size_t max_iters = 64, size_t num_threads = 1) {
+Vector pagerank(const CSCMatrix& P, double alpha, double tol = 1.e-4, size_t max_iters = 64, size_t num_threads = 1) {
 
   Vector x(P.num_rows(), 1.0);
   x *= 1.0 / one_norm(x);

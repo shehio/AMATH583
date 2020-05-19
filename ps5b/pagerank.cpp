@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
   DEF_TIMER(read);
   START_TIMER(read);
-  CSRMatrix A = read_csrmatrix(input_file);
+  CSCMatrix A = read_cscmatrix(input_file);
   A.stochastify();
   STOP_TIMER(read);
 
