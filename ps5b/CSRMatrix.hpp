@@ -74,38 +74,38 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  void matvec_task(const Vector& x, Vector& y, size_t start, size_t end)
+  static void matvec_task(const CSRMatrix* mat, const Vector& x, Vector& y, size_t start, size_t end)
   {
     for (size_t i = start; i < end; i++)
     {
-      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j)
+      for (size_t j = mat->row_indices_[i]; j < mat->row_indices_[i + 1]; ++j)
       {
-         y(i) += storage_[j] * x(col_indices_[j]);
+         y(i) += mat->storage_[j] * x(mat->col_indices_[j]);
       }
     }
   }
   
+  // void matvec(const Vector& x, Vector& y, size_t partitions) const
+  // {
+  //   std::vector<std::thread> threads;
+  //   size_t blocksize = num_rows_ / partitions;
+
+  //   for (size_t i = 0; i < partitions; ++i)
+  //   {
+  //     threads.push_back(std::thread(&CSRMatrix::matvec_task, this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize));
+  //   }
+
+  //   for (size_t i = 0; i < partitions; ++i) {
+  //     threads[i].join();
+  //   }
+  // }
+
   void matvec(const Vector& x, Vector& y, size_t partitions) const
-  {
-    std::vector<std::thread> threads;
-    size_t blocksize = num_rows_ / partitions;
-
-    for (size_t i = 0; i < partitions; ++i)
-    {
-      threads.push_back(std::thread(&CSRMatrix::matvec_task, *this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize));
-    }
-
-    for (size_t i = 0; i < partitions; ++i) {
-      threads[i].join();
-    }
-  }
-
-  void matvec_async_impl(const Vector& x, Vector& y, size_t partitions) const
   {
     size_t blocksize = num_rows_ / partitions;
     for (int i = 0; i < partitions; i++)
     {
-      std::async(std::launch::async, &CSRMatrix::matvec_task, *this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize);
+      std::async(std::launch::async, &CSRMatrix::matvec_task, this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize);
     }
   }
 
