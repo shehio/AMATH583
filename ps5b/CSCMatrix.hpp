@@ -89,7 +89,8 @@ public:
     return ret;
   }
 
-  void t_matvec(const Vector& x, Vector& y, size_t tasks_count) const {
+  __attribute__((noinline))
+  void t_matvec(const Vector& x, Vector& y, size_t tasks_count) const  {
     std::vector<std::future<std::vector<double> > > futures;
     int blocksize = num_rows_ / tasks_count;
 

@@ -69,38 +69,46 @@ The speedup is around -1.5x for all the threads.
     33554432     3.57914     1.53392     2.77883     4.01849     3.56962   1.61807e-14     2.937e-14   1.31893e-14   7.47847e-15
 
 * How does the performance of cyclic partitioning compare to blocked?  Explain any significant differences, referring to, say, performance models or CPU architectural models.
-
+For only 1 thread, that is, I removed all the others from the run, I can see that the thread creation takes around 80% of the time. So, the speed down is understandable. After profiling for only threads=8, starting threads is actually taking 92.5% of the time.
+Another speed-down reason might because different strides require page faults. This is less common when the thread count is small, but will def increase with with adding more and more threads.
 
 rnorm
 -----
 
 * How much parallel speedup do you see for 1, 2, 4, and 8 threads?
            N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
-     1048576     2.41825      5.1311     2.50826     3.02643     2.39533             0   1.92318e-16             0   1.92318e-16
-     2097152     2.65821     3.84741     3.08256     2.40237     2.68612   5.43881e-16   4.07911e-16   9.51792e-16   5.43881e-16
-     4194304     3.66635     4.51972     2.94544     2.76669     3.22639    9.6159e-16   1.92318e-16   5.76954e-16   3.84636e-16
-     8388608     3.54065     4.31035     3.52919     2.96337     3.26503    1.3595e-16   5.43801e-16             0             0
-    16777216     3.85051     3.86317     3.41397      3.5588     3.23528   3.84567e-16   1.34599e-15   1.92284e-16             0
-    33554432     2.80204     4.12978     3.52278     3.35544     3.77016   7.20652e-15   7.61444e-15   6.66264e-15   6.93458e-15
+     1048576     6.47966     10.6403     11.7538     8.35394     4.26509             0   1.92318e-16             0   1.92318e-16
+     2097152     5.24826     7.63739     6.20249     5.27531     5.19498   5.43881e-16   4.07911e-16   9.51792e-16   5.43881e-16
+     4194304     4.68114     6.16809     4.63972       4.096     4.03298    9.6159e-16   1.92318e-16   5.76954e-16   3.84636e-16
+     8388608     3.88085     5.02543     4.58201     3.34515     3.55218    1.3595e-16   5.43801e-16             0             0
+    16777216     3.06633     5.31405     3.96758     3.94096     3.61355   3.84567e-16   1.34599e-15   1.92284e-16             0
+    33554432     4.42963       5.084     4.07957     3.73866     3.77016   7.20652e-15   7.61444e-15   6.66264e-15   6.93458e-15
 
            N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
-     1048576     4.26509     4.79065     6.52147     6.01683     5.46393   1.15258e-15   1.53677e-15   1.34467e-15   1.34467e-15
-     2097152     4.07733     3.92111     4.24652     3.74876      4.1943   2.71928e-15   2.03946e-15   2.03946e-15    1.9035e-15
-     4194304     3.85506     3.67921     3.67921     3.51871     3.74491   9.61294e-16   1.92259e-16             0   3.84518e-16
-     8388608     3.59907     3.45101     3.63506     3.47299     3.41855   1.49582e-15   1.08787e-15   5.43933e-16   1.35983e-16
-    16777216     3.53736     3.52674     3.43393     3.40407      3.5588   5.00099e-15   4.03926e-15   3.84691e-15    4.2316e-15
-    33554432     3.70767     3.48617     3.46816     3.59833     3.43268   3.67179e-15   4.62374e-15   5.57568e-15   4.35175e-15
+     1048576     3.06311      6.3574     5.91127     3.57183     5.37674   1.15258e-15   1.53677e-15   1.34467e-15   1.34467e-15
+     2097152     4.01337     4.35494     4.65186     4.71618     4.54849   2.71928e-15   2.03946e-15   2.03946e-15    1.9035e-15
+     4194304     3.37163     3.26659     2.95374     3.40447     4.08006   9.61294e-16   1.92259e-16             0   3.84518e-16
+     8388608       4.433     3.74749     4.00926     4.52498     4.36208   1.49582e-15   1.08787e-15   5.43933e-16   1.35983e-16
+    16777216     4.12072      4.3336     3.61355     4.25509      4.1943   5.00099e-15   4.03926e-15   3.84691e-15    4.2316e-15
+    33554432     4.27445       4.234     4.30185     4.34362      4.1943   3.67179e-15   4.62374e-15   5.57568e-15   4.35175e-15
 
 * What will happen if you use ``std:::launch::deferred`` instead of ``std:::launch::async`` when launching tasks?  When will the computations happen?  Will you see any speedup?  For your convenience, the driver program will also call ``recursive_two_norm_b`` -- which you can implement as a copy of ``recursive_two_norm_a`` but with the launch policy changed.
-
+The computation happens using lazy evaluation, i.e., only when the data is needed, the thread is started and not right away. I see some small speedup when N=1048576 for threads=8. But that's mostly it.
 
 General
 -------
 
 * For the different approaches to parallelization, were there any major differences in how much parallel speedup that you saw?
+Not really, in all the ones that I profiled, it seems that for memory-bound work, threads aren't really useful. Maybe with the increase of computational complexity, and the increase of page faults; memory accesses, we can see an improvement in the work. 
 
 * You may have seen the speedup slowing down as the problem sizes got larger -- if you didn't keep trying larger problem sizes.  What is limiting parallel speedup for two_norm (regardless of approach)?  What would determine the problem sizes where you should see ideal speedup?  (Hint: Roofline model.)
 
+For my machine almost all the speedups are in the range of 32K to 512K (incredibly consistent with my l1 and L2 cache sizes):
+       32768     13.1624     12.5043     12.5043     13.5181     8.47747             0    1.3567e-16    1.3567e-16   2.71341e-16
+       65536     11.9135     12.6675     14.0949     12.2041     10.9971             0   1.92632e-16   1.92632e-16             0
+      131072     11.6441     13.5323     14.5129     13.1762     12.2121             0   4.07686e-16   2.71791e-16   4.07686e-16
+      262144     11.7996     10.9018     13.5536     14.7495       13.93             0   1.92302e-16   1.92302e-16   1.92302e-16
+      524288     9.85867     10.0558     10.0558     13.4078     13.4078             0   5.43733e-16             0             0
 
 Conundrum #1
 ------------
