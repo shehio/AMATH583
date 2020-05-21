@@ -85,22 +85,22 @@ public:
     }
   }
   
-  // void matvec(const Vector& x, Vector& y, size_t partitions) const
-  // {
-  //   std::vector<std::thread> threads;
-  //   size_t blocksize = num_rows_ / partitions;
-
-  //   for (size_t i = 0; i < partitions; ++i)
-  //   {
-  //     threads.push_back(std::thread(&CSRMatrix::matvec_task, this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize));
-  //   }
-
-  //   for (size_t i = 0; i < partitions; ++i) {
-  //     threads[i].join();
-  //   }
-  // }
-
   void matvec(const Vector& x, Vector& y, size_t partitions) const
+  {
+    std::vector<std::thread> threads;
+    size_t blocksize = num_rows_ / partitions;
+
+    for (size_t i = 0; i < partitions; ++i)
+    {
+      threads.push_back(std::thread(&CSRMatrix::matvec_task, this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize));
+    }
+
+    for (size_t i = 0; i < partitions; ++i) {
+      threads[i].join();
+    }
+  }
+
+  void matvec_async(const Vector& x, Vector& y, size_t partitions) const
   {
     size_t blocksize = num_rows_ / partitions;
     for (int i = 0; i < partitions; i++)
