@@ -18,6 +18,7 @@
 
 // Any additional includes go here
 #include <future>
+#include <thread>
 
 class CSCMatrix {
 public:
@@ -70,50 +71,38 @@ public:
   // Your overload(s) for parallel matvec and/or t_matvec go here
   // No skeleton this time
 
-  static std::vector<double> t_matvec_task(
-    const Vector& x,
-    size_t start,
-    size_t end,
-    std::vector<size_t> row_indices_,
-    std::vector<size_t> col_indices_,
-    std::vector<double> storage_)
+  static void t_matvec_task(const CSCMatrix* mat, const Vector& x, Vector& y, size_t start, size_t end)
   {
-    std::vector<double> ret(end - start);
     for (size_t i = start; i < end; i++)
     {
-      for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
-        ret[i - start] += storage_[j] * x(row_indices_[j]);
+      for (size_t j = mat->col_indices_[i]; j < mat->col_indices_[i + 1]; ++j) {
+        y(i) += mat->storage_[j] * x(mat->row_indices_[j]);
       }
     }
-    
-    return ret;
   }
 
   __attribute__((noinline))
-  void t_matvec(const Vector& x, Vector& y, size_t tasks_count) const  {
-    std::vector<std::future<std::vector<double> > > futures;
-    int blocksize = num_rows_ / tasks_count;
+  void t_matvec(const Vector& x, Vector& y, size_t partitions) const  {
 
-    for (int i = 0; i < tasks_count; i++)
+    std::vector<std::thread> threads;
+    size_t blocksize = num_rows_ / partitions;
+
+    for (size_t i = 0; i < partitions; ++i)
     {
-      futures.push_back(std::async(
-        std::launch::any,
-        &CSCMatrix::t_matvec_task,
-        std::cref(x),
-        i * blocksize,
-        (i + 1) * blocksize,
-        row_indices_,
-        col_indices_,
-        storage_));
+      threads.push_back(std::thread(&CSCMatrix::t_matvec_task, this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize));
     }
 
-    for (size_t i = 0; i < futures.size(); ++i) 
+    for (size_t i = 0; i < partitions; ++i) {
+      threads[i].join();
+    }
+  }
+
+  void t_matvec_async(const Vector& x, Vector& y, size_t partitions) const
+  {
+    size_t blocksize = num_rows_ / partitions;
+    for (int i = 0; i < partitions; i++)
     {
-      auto vec = futures[i].get();
-      for (size_t j = 0; j < vec.size(); j++)
-      {
-        y(i * blocksize + j) += vec[j];
-      }
+      std::async(std::launch::async, &CSCMatrix::t_matvec_task, this, std::cref(x), std::ref(y), i * blocksize, (i + 1) * blocksize);
     }
   }
 
