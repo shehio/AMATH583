@@ -76,34 +76,38 @@ rnorm
 -----
 
 * How much parallel speedup do you see for 1, 2, 4, and 8 threads?
+c++ -std=c++17  -Ofast -march=native -DNDEBUG   -Wall rnorm.o amath583.o amath583IO.o amath583sparse.o -o rnorm.exe 
            N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
-     1048576     6.47966     10.6403     11.7538     8.35394     4.26509             0   1.92318e-16             0   1.92318e-16
-     2097152     5.24826     7.63739     6.20249     5.27531     5.19498   5.43881e-16   4.07911e-16   9.51792e-16   5.43881e-16
-     4194304     4.68114     6.16809     4.63972       4.096     4.03298    9.6159e-16   1.92318e-16   5.76954e-16   3.84636e-16
-     8388608     3.88085     5.02543     4.58201     3.34515     3.55218    1.3595e-16   5.43801e-16             0             0
-    16777216     3.06633     5.31405     3.96758     3.94096     3.61355   3.84567e-16   1.34599e-15   1.92284e-16             0
-    33554432     4.42963       5.084     4.07957     3.73866     3.77016   7.20652e-15   7.61444e-15   6.66264e-15   6.93458e-15
+     1048576     5.43456     4.70152     4.65819     5.21045     5.10519             0             0   1.92318e-16             0
+     2097152     4.06115      4.5688     5.16874     5.41487     4.99224             0   5.43881e-16   4.07911e-16   9.51792e-16
+     4194304      4.1943       3.813     4.76625     4.06425     3.66635             0    9.6159e-16   1.92318e-16   5.76954e-16
+     8388608     4.00926     3.78652      4.3447     3.92273     3.86709             0    1.3595e-16   5.43801e-16             0
+    16777216     4.00821     3.86317      4.3336     3.90168     3.99458             0   3.84567e-16   1.34599e-15   1.92284e-16
+    33554432     4.01849     3.89037     4.48889     3.99458     4.07957             0   7.20652e-15   7.61444e-15   6.66264e-15
 
            N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
-     1048576     3.06311      6.3574     5.91127     3.57183     5.37674   1.15258e-15   1.53677e-15   1.34467e-15   1.34467e-15
-     2097152     4.01337     4.35494     4.65186     4.71618     4.54849   2.71928e-15   2.03946e-15   2.03946e-15    1.9035e-15
-     4194304     3.37163     3.26659     2.95374     3.40447     4.08006   9.61294e-16   1.92259e-16             0   3.84518e-16
-     8388608       4.433     3.74749     4.00926     4.52498     4.36208   1.49582e-15   1.08787e-15   5.43933e-16   1.35983e-16
-    16777216     4.12072      4.3336     3.61355     4.25509      4.1943   5.00099e-15   4.03926e-15   3.84691e-15    4.2316e-15
-    33554432     4.27445       4.234     4.30185     4.34362      4.1943   3.67179e-15   4.62374e-15   5.57568e-15   4.35175e-15
+     1048576     5.46393      6.3574     6.56381      6.3574     6.23967             0   1.15258e-15   1.53677e-15   1.34467e-15
+     2097152     4.46904     4.44961     4.22897     4.37355     4.78229             0   2.71928e-15   2.03946e-15   2.03946e-15
+     4194304     4.14457     3.85506     3.14888     4.14457     4.01753             0   9.61294e-16   1.92259e-16             0
+     8388608      3.5178     3.32475     3.48409     3.29462     2.85476             0   1.49582e-15   1.08787e-15   5.43933e-16
+    16777216     3.43393     3.22639     3.20001     3.64722     3.70475             0   5.00099e-15   4.03926e-15   3.84691e-15
+    33554432     3.77016       3.813     2.96286     3.39792     3.24197             0   3.67179e-15   4.62374e-15   5.57568e-15
+
+There's a little speedup ranging from 1x to 1.5x. Smaller Ns yield bigger improvements inline with my cache.
 
 * What will happen if you use ``std:::launch::deferred`` instead of ``std:::launch::async`` when launching tasks?  When will the computations happen?  Will you see any speedup?  For your convenience, the driver program will also call ``recursive_two_norm_b`` -- which you can implement as a copy of ``recursive_two_norm_a`` but with the launch policy changed.
-The computation happens using lazy evaluation, i.e., only when the data is needed, the thread is started and not right away. I see some small speedup when N=1048576 for threads=8. But that's mostly it.
+Deferred will make the computation happens using lazy evaluation, i.e., only when the data is needed, the thread is started and not right away. I see some small speedup when N=1048576 for threads=8. But that's mostly it.
 
 General
 -------
 
 * For the different approaches to parallelization, were there any major differences in how much parallel speedup that you saw?
-Not really, in all the ones that I profiled, it seems that for memory-bound work, threads aren't really useful. Maybe with the increase of computational complexity, and the increase of page faults; memory accesses, we can see an improvement in the work. 
+Yeah, there's a large difference between pnorm and cnorm for exampe. It seems that for memory-bound work, threads aren't really useful. Maybe with the increase of computational complexity, and the decrease of page faults; memory accesses, we can see an improvement in the work. 
 
 * You may have seen the speedup slowing down as the problem sizes got larger -- if you didn't keep trying larger problem sizes.  What is limiting parallel speedup for two_norm (regardless of approach)?  What would determine the problem sizes where you should see ideal speedup?  (Hint: Roofline model.)
 
 For my machine almost all the speedups are in the range of 32K to 512K (incredibly consistent with my l1 and L2 cache sizes):
+Here's the data for smaller Ns
        32768     13.1624     12.5043     12.5043     13.5181     8.47747             0    1.3567e-16    1.3567e-16   2.71341e-16
        65536     11.9135     12.6675     14.0949     12.2041     10.9971             0   1.92632e-16   1.92632e-16             0
       131072     11.6441     13.5323     14.5129     13.1762     12.2121             0   4.07686e-16   2.71791e-16   4.07686e-16
@@ -112,6 +116,18 @@ For my machine almost all the speedups are in the range of 32K to 512K (incredib
 
 Conundrum #1
 ------------
+$ ./pnorm.exe
+           N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
+     1048576     6.39764     6.08932     10.3146     12.9593     11.7538             0             0   1.92318e-16             0
+     2097152     4.78229     4.37355     4.39232     5.11705     4.67311             0   5.43881e-16   4.07911e-16   9.51792e-16
+     4194304     4.12825     3.70522     4.48109     3.86928     3.43795             0    9.6159e-16   1.92318e-16   5.76954e-16
+     8388608     3.95116     3.68419      4.3447     3.76041     3.67178             0    1.3595e-16   6.79751e-16    1.3595e-16
+    16777216     3.90168     3.70475     4.28615       3.813     3.92778             0   3.84567e-16   1.34599e-15   3.84567e-16
+    33554432     3.92449      3.7491     3.89037     3.97094     4.20745             0   7.20652e-15   7.47847e-15   6.66264e-15
+$ ./pnorm.exe 128 256
+           N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
+         128     18.1818   0.0116568  0.00820851  0.00411896  0.00222947             0             0             0             0
+         256     27.7778   0.0224684   0.0166653   0.0094647  0.00455281             0             0   1.94081e-16   1.94081e-16
 
 1. What is causing this behavior?
 Many many thread creation and disposal without enough work justifying their creation.
@@ -124,19 +140,6 @@ That will involve changing the structure of the whole program, so no, not really
 Another simple fix would be to determine whether to execute the sequential or the muti-threaded algorithm based on the size of the problem. So, if the problem is small execute the serial implementation to avoid the overhead of thread creation and if the problem is sufficiently large then determine the number of threads based on a regression model or something.
 
 
-make: `pnorm.exe' is up to date.
-           N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
-     1048576     6.39764     6.08932     10.3146     12.9593     11.7538             0             0   1.92318e-16             0
-     2097152     4.78229     4.37355     4.39232     5.11705     4.67311             0   5.43881e-16   4.07911e-16   9.51792e-16
-     4194304     4.12825     3.70522     4.48109     3.86928     3.43795             0    9.6159e-16   1.92318e-16   5.76954e-16
-     8388608     3.95116     3.68419      4.3447     3.76041     3.67178             0    1.3595e-16   6.79751e-16    1.3595e-16
-    16777216     3.90168     3.70475     4.28615       3.813     3.92778             0   3.84567e-16   1.34599e-15   3.84567e-16
-    33554432     3.92449      3.7491     3.89037     3.97094     4.20745             0   7.20652e-15   7.47847e-15   6.66264e-15
-shehios-MBP:ps5b shehio$ ./pnorm.exe 128 256
-           N  Sequential    1 thread   2 threads   4 threads   8 threads      1 thread     2 threads     4 threads     8 threads
-         128     18.1818   0.0116568  0.00820851  0.00411896  0.00222947             0             0             0             0
-         256     27.7778   0.0224684   0.0166653   0.0094647  0.00455281             0             0   1.94081e-16   1.94081e-16
-
 
 Parallel matvec
 ---------------
@@ -144,6 +147,8 @@ Parallel matvec
 * Which methods did you implement?
 CSR -> matvec
 CSC -> t_matvec
+
+These are the only one that don't require locks. For the other ones, to avoid race conditions, we will have to use locks which are extremely expensive.
 
 * How much parallel speedup do you see for the methods that you implemented for 1, 2, 4, and 8 threads?
 1 threads   
