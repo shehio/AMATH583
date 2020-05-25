@@ -92,6 +92,47 @@ Sparse Matrix Dense Matrix Product (AMATH583 Only)
 * Which methods did you parallelize?  What directives did you use?  How much parallel speedup did you see for 1, 2, 4, and 8 threads?  How does the parallel speedup compare to sparse matrix by vector product?
 
 
+BEFORE!
+
+shehios-MBP:matvec shehio$ make pmatmat.exe && ./pmatmat.exe
+g++-9 -c  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pmatmat.cpp -o pmatmat.o
+g++-9 -c  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  ../src/amath583IO.cpp -o amath583IO.o
+g++-9 -c  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  ../src/amath583sparse.cpp -o amath583sparse.o
+g++-9  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pmatmat.o amath583.o amath583IO.o amath583sparse.o -o pmatmat.exe -L/usr/local/lib -lomp
+1 threads   
+ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC
+      64      4096       20224       1    0.681153    0.614621    0.449468
+     128     16384       81408       1    0.625152    0.686695    0.480189
+     256     65536      326656       1    0.504053    0.666249    0.453139
+     512    262144     1308672       1    0.523469    0.558643    0.429594
+    1024   1048576     5238784       1    0.537311    0.544289    0.376722
+    2048   4194304    20963328       1    0.523149    0.539497    0.375303
+2 threads   
+ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC
+      64      4096       20224       1    0.623319    0.691851    0.460431
+     128     16384       81408       1    0.662661    0.693886    0.466663
+     256     65536      326656       1    0.598143    0.676293    0.457763
+     512    262144     1308672       1    0.552096    0.525415    0.414477
+    1024   1048576     5238784       1    0.547847    0.542528    0.385382
+    2048   4194304    20963328       1    0.378204    0.467335    0.389756
+4 threads   
+ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC
+      64      4096       20224       1    0.641474    0.699173    0.475337
+     128     16384       81408       1    0.622217    0.634125    0.360142
+     256     65536      326656       1    0.544867    0.653312    0.459325
+     512    262144     1308672       1    0.554261    0.611847    0.432222
+    1024   1048576     5238784       1    0.480347     0.46567    0.391685
+    2048   4194304    20963328       1    0.588149    0.466592    0.390275
+8 threads   
+ N(Grid) N(Matrix)         NNZ    NRHS         COO         CSR         CSC
+      64      4096       20224       1    0.451002    0.427649    0.337963
+     128     16384       81408       1    0.509739    0.665991    0.473329
+     256     65536      326656       1    0.580096    0.656499    0.371774
+     512    262144     1308672       1    0.466457    0.484029    0.327927
+    1024   1048576     5238784       1    0.441161    0.442325    0.390772
+    2048   4194304    20963328       1    0.478771    0.498279    0.365488
+
+
 PageRank Reprise
 ----------------
 
