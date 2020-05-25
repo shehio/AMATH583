@@ -15,6 +15,8 @@
 #include <cassert>
 #include <vector>
 
+#include "omp.h"
+
 class CSCMatrix {
 public:
   CSCMatrix(size_t M, size_t N) : is_open(false), num_rows_(M), num_cols_(N), col_indices_(num_cols_ + 1, 0) {}
@@ -72,9 +74,21 @@ public:
   }
 
   void t_matvec(const Vector& x, Vector& y) const {
-    for (size_t i = 0; i < num_cols_; ++i) {
-      for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
-        y(i) += storage_[j] * x(row_indices_[j]);
+    #pragma omp parallel
+    {
+      size_t tid       = omp_get_thread_num();
+      size_t parts     = omp_get_num_threads();
+      size_t blocksize = num_rows_ / parts;
+      size_t begin     = tid * blocksize;
+      size_t end       = (tid + 1) * blocksize;
+
+      if (tid == parts - 1) {
+        end = y.num_rows();
+      }
+      for (size_t i = begin; i < end; ++i) {
+        for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
+          y(i) += storage_[j] * x(row_indices_[j]);
+        }
       }
     }
   }

@@ -74,6 +74,9 @@ Sparse Matrix-Vector Product
 ----------------------------
 
 * How does ``pmatvec.cpp`` set the number of OpenMP threads to use?
+#ifdef _OPENMP
+    omp_set_num_threads(nthreads);
+#endif
 
 * (For discussion on Piazza.)
 What characteristics of a matrix would make it more or less likely to exhibit an error 

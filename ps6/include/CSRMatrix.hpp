@@ -20,6 +20,7 @@
 #include <vector>
 
 #include <future>
+#include "omp.h"
 
 class CSRMatrix {
 public:
@@ -70,9 +71,22 @@ public:
   }
 
   void matvec(const Vector& x, Vector& y) const {
-    for (size_t i = 0; i < num_rows_; ++i) {
-      for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
-        y(i) += storage_[j] * x(col_indices_[j]);
+    #pragma omp parallel
+    {
+      size_t tid       = omp_get_thread_num();
+      size_t parts     = omp_get_num_threads();
+      size_t blocksize = num_rows_ / parts;
+      size_t begin     = tid * blocksize;
+      size_t end       = (tid + 1) * blocksize;
+
+      if (tid == parts - 1) {
+        end = y.num_rows();
+      }
+
+      for (size_t i =  begin; i < end; ++i) {
+        for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
+          y(i) += storage_[j] * x(col_indices_[j]);
+        }
       }
     }
   }

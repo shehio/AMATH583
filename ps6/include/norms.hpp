@@ -107,7 +107,7 @@ double norm_cyclic_critical(const Vector& x) {
 double norm_cyclic_reduction(const Vector& x) {
   double sum = 0;
 
-  #pragma omp parallel  reduction(+:sum)
+  #pragma omp parallel reduction(+:sum)
   {
     size_t tid       = omp_get_thread_num();
 
