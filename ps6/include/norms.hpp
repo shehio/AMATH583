@@ -30,6 +30,7 @@ double norm_block_reduction(const Vector& x) {
   double sum = 0;
 
   /* Parallelize me (using reduction) */
+  // #pragma omp parallel
   {
     size_t tid       = omp_get_thread_num();
     size_t parts     = omp_get_num_threads();
@@ -40,6 +41,7 @@ double norm_block_reduction(const Vector& x) {
       end = x.num_rows();
     }
 
+    // #pragma omp critical
     for (size_t i = begin; i < end; ++i) {
       sum += x(i) * x(i);
     }
@@ -50,14 +52,53 @@ double norm_block_reduction(const Vector& x) {
 double norm_block_critical(const Vector& x) {
   double sum = 0;
 
-  /* Write me (without reduction but with critical) */
+  #pragma omp parallel
+  {
+    size_t tid       = omp_get_thread_num();
+    size_t parts     = omp_get_num_threads();
+    size_t blocksize = x.num_rows() / parts;
+    size_t begin     = tid * blocksize;
+    size_t end       = (tid + 1) * blocksize;
+    if (tid == parts - 1) {
+      end = x.num_rows();
+    }
+
+    double local_sum = 0;
+
+    for (size_t i = begin; i < end; ++i) {
+      local_sum += x(i) * x(i);
+    }
+
+    #pragma omp critical
+    {
+      sum += local_sum;
+    }
+  }
+  
   return std::sqrt(sum);
 }
 
 double norm_cyclic_critical(const Vector& x) {
   double sum = 0;
 
-  /* Write me */
+  #pragma omp parallel
+  {
+    size_t tid       = omp_get_thread_num();
+
+    double local_sum = 0;
+
+    // strides = partitions
+    for (size_t i = tid; i < x.num_rows(); ++i)
+    {
+      local_sum += x(i) * x(i);
+    }
+
+    #pragma omp critical
+    {
+      sum += local_sum;
+    }
+  }
+
   return std::sqrt(sum);
 }
 
