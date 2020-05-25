@@ -94,10 +94,24 @@ public:
   }
 
   void matmat(const Matrix& B, Matrix& C) const {
-    for (size_t i = 0; i < num_cols_; ++i) {
-      for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
-        for (size_t k = 0; k < B.num_cols(); ++k) {
-          C(row_indices_[j], k) += storage_[j] * B(i, k);
+
+    #pragma omp parallel
+    {
+      size_t tid       = omp_get_thread_num();
+      size_t parts     = omp_get_num_threads();
+      size_t blocksize = B.num_cols() / parts;
+      size_t begin     = tid * blocksize;
+      size_t end       = (tid + 1) * blocksize;
+
+      if (tid == parts - 1) {
+        end = B.num_cols();
+      }
+
+      for (size_t i = 0; i < num_cols_; ++i) {
+        for (size_t j = col_indices_[i]; j < col_indices_[i + 1]; ++j) {
+          for (size_t k = begin; k < end; ++k) {
+            C(row_indices_[j], k) += storage_[j] * B(i, k);
+          }
         }
       }
     }
