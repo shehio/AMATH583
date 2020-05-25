@@ -140,8 +140,57 @@ PageRank Reprise
 
 * (EC) Which functions did you parallelize?  How much additional speedup did you achieve?
 
+Parallel norm2 and norm1.
+sort can be but too complicated.
+std::swap can't be.
+
+shehios-MBP:pagerank shehio$ make pagerank.exe && ./pagerank.exe  ./../data/cit-Patents_adj.mtx -n 8
+make: `pagerank.exe' is up to date.
+# elapsed time [read]: 30314 ms
+Converged in 37 iterations
+# elapsed time [pagerank]: 7483 ms
+
+g++-9  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pagerank.o amath583.o amath583IO.o amath583sparse.o -o pagerank.exe -L/usr/local/lib -lomp
+# elapsed time [read]: 33332 ms
+Converged in 37 iterations
+# elapsed time [pagerank]: 7200 ms
+# elapsed time [rank]: 358 ms
 
 Load Balanced Partitioning with OpenMP (Extra Credit)
 -----------------------------------------------------
 
 * Are there any choices for scheduling that make an improvement in the parallel performance (most importantly, scalability) of pagerank?
+
+
+STATIC == BETTER?
+
+g++-9 -c  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pagerank.cpp -o pagerank.o
+g++-9  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pagerank.o amath583.o amath583IO.o amath583sparse.o -o pagerank.exe -L/usr/local/lib -lomp
+# elapsed time [read]: 30035 ms
+Converged in 37 iterations
+# elapsed time [pagerank]: 6868 ms
+# elapsed time [rank]: 330 ms
+
+
+DYNAMIC == BEST
+
+shehios-MBP:pagerank shehio$ make pagerank.exe && ./pagerank.exe  ./../data/cit-Patents_adj.mtx -n 8
+g++-9 -c  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pagerank.cpp -o pagerank.o
+g++-9  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pagerank.o amath583.o amath583IO.o amath583sparse.o -o pagerank.exe -L/usr/local/lib -lomp
+# elapsed time [read]: 28747 ms
+Converged in 37 iterations
+# elapsed time [pagerank]: 6386 ms
+# elapsed time [rank]: 333 ms
+
+
+GUIDED === BAD
+++-9  -fopenmp -Ofast -march=native -DNDEBUG   -std=c++11 -Wall -I../include  pagerank.o amath583.o amath583IO.o amath583sparse.o -o pagerank.exe -L/usr/local/lib -lomp
+# elapsed time [read]: 32660 ms
+Converged in 37 iterations
+# elapsed time [pagerank]: 8797 ms
+# elapsed time [rank]: 391 ms
+
+
+
+REPROING THESE NUMBERS too
+

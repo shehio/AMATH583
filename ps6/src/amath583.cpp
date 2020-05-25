@@ -17,6 +17,9 @@
 #include <functional>
 #include <random>
 
+
+#include "norms.hpp"
+
 // ----------------------------------------------------------------
 //
 // Vector arithmetic
@@ -45,23 +48,39 @@ void randomize(Vector& x, double scale, double mean) {
 }
 
 double one_norm(const Vector& x) {
-  double sum = 0.0;
-  for (size_t i = 0; i < x.num_rows(); ++i) {
-    sum += std::abs(x(i));
+  double sum = 0;
+
+  #pragma omp parallel
+  {
+    size_t tid       = omp_get_thread_num();
+    size_t parts     = omp_get_num_threads();
+    size_t blocksize = x.num_rows() / parts;
+    size_t begin     = tid * blocksize;
+    size_t end       = (tid + 1) * blocksize;
+    if (tid == parts - 1) {
+      end = x.num_rows();
+    }
+
+    double local_sum = 0;
+
+    for (size_t i = begin; i < end; ++i) {
+      local_sum += std::abs(x(i));
+    }
+
+    #pragma omp critical
+    {
+      sum += local_sum;
+    }
   }
+
   return sum;
 }
 
 double two_norm(const Vector& x) {
-  double sum = 0.0;
-  for (size_t i = 0; i < x.num_rows(); ++i) {
-    sum += x(i) * x(i);
-  }
-  return std::sqrt(sum);
+  return norm_block_critical(x);
 }
 
 double two_norm_r(const Vector& x) {
-  // Fix me
   double sum = 0.0;
   for (size_t i = x.num_rows() - 1; i > 0; --i) {
     sum += x(i) * x(i);
@@ -72,7 +91,6 @@ double two_norm_r(const Vector& x) {
 }
 
 double two_norm_s(const Vector& x) {
-  // Fix me
   Vector w(x);
   std::sort(&w(0), &w(0) + w.num_rows());
   double sum = 0.0;

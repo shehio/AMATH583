@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
   }
 
   omp_set_num_threads(num_threads);
+  omp_set_schedule(omp_sched_static, 0);
 
   DEF_TIMER(read);
   START_TIMER(read);
