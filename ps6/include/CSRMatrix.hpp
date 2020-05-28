@@ -113,9 +113,9 @@ public:
         end = B.num_cols();
       }
 
-      for (size_t i = 0; i < num_rows_; ++i) {
-        for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
-          for (size_t k = begin; k < end; ++k) {
+      for (size_t k = begin; k < end; ++k) {
+        for (size_t i = 0; i < num_rows_; ++i) {
+          for (size_t j = row_indices_[i]; j < row_indices_[i + 1]; ++j) {
             C(i, k) += storage_[j] * B(col_indices_[j], k);
           }
         }
