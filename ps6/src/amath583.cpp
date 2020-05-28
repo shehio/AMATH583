@@ -16,9 +16,7 @@
 #include <cmath>
 #include <functional>
 #include <random>
-
-
-#include "norms.hpp"
+#include "omp.h"
 
 // ----------------------------------------------------------------
 //
@@ -77,7 +75,32 @@ double one_norm(const Vector& x) {
 }
 
 double two_norm(const Vector& x) {
-  return norm_block_critical(x);
+  double sum = 0;
+
+  #pragma omp parallel
+  {
+    size_t tid       = omp_get_thread_num();
+    size_t parts     = omp_get_num_threads();
+    size_t blocksize = x.num_rows() / parts;
+    size_t begin     = tid * blocksize;
+    size_t end       = (tid + 1) * blocksize;
+    if (tid == parts - 1) {
+      end = x.num_rows();
+    }
+
+    double local_sum = 0;
+
+    for (size_t i = begin; i < end; ++i) {
+      local_sum += x(i) * x(i);
+    }
+
+    #pragma omp critical
+    {
+      sum += local_sum;
+    }
+  }
+  
+  return std::sqrt(sum);
 }
 
 double two_norm_r(const Vector& x) {
