@@ -8,14 +8,8 @@
 // Author: Andrew Lumsdaine
 //
 
-#include <thrust/transform_reduce.h>
-#include <thrust/functional.h>
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
-
-#include <thrust/copy.h>
-#include <thrust/fill.h>
-#include <thrust/sequence.h>
+#ifndef AMATH583_NORM_UTILS_HPP
+#define AMATH583_NORM_UTILS_HPP
 
 #include <cmath>
 #include <cstddef>
@@ -28,32 +22,25 @@
 #include "Vector.hpp"
 #include "amath583.hpp"
 
-template<typename T>
-T norm_thrust(const thrust::device_vector<T>& x) {
-  // Write me
-  thrust::square<float>        unary_op;
-  thrust::plus<float> binary_op;
-  T init = 0;
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
-  T norm = std::sqrt( thrust::transform_reduce(x.begin(), x.end(), unary_op, init, binary_op) );
-
-  return norm;
-}
-
-void header(const std::string& msg = "") {
+void header(size_t n_threads, const std::string& msg = "") {
   auto& os_ = std::cout;
   if (msg != "") {
     os_ << std::setw(12) << std::left << msg << std::endl;
   }
   os_ << std::setw(12) << std::right << "N";
   os_ << std::setw(12) << std::right << "Sequential";
-
-  os_ << std::setw(12) << std::right << "First";
-  os_ << std::setw(12) << std::right << "Second";
-
-  os_ << std::setw(12) << std::right << "First";
-  os_ << std::setw(12) << std::right << "Second";
-
+  os_ << std::setw(12) << std::right << "1 thread";
+  for (size_t i = 2; i <= n_threads; i *= 2) {
+    os_ << std::setw(4) << std::right << i << " threads";
+  }
+  os_ << std::setw(14) << std::right << "1 thread";
+  for (size_t i = 2; i <= n_threads; i *= 2) {
+    os_ << std::setw(6) << std::right << i << " threads";
+  }
   os_ << std::endl;
 }
 
@@ -87,19 +74,16 @@ size_t num_trials(size_t nnz) {
   return 5 + static_cast<size_t>(N_1k);
 }
 
-template <class T, typename Function>
-void run_cu(Function&& f, size_t N_min, size_t N_max) {
-  header(sizeof(T) == 4 ? "\nFloat" : "\nDouble");
+template <typename Function>
+void run(Function&& f, size_t N_min, size_t N_max, size_t n_parts) {
+  header(n_parts);
   Timer t;
 
   for (size_t size = N_min; size <= N_max; size *= 2) {
     std::vector<double> ms_times;
     std::vector<double> norms;
-
-    Vector            x(size);
-      
+    Vector              x(size);
     randomize(x);
-
     double norm0 = two_norm(x);
     double norm1 = 0.0;
 
@@ -113,16 +97,13 @@ void run_cu(Function&& f, size_t N_min, size_t N_max) {
     ms_times.push_back(t.elapsed());
     norms.push_back(norm0);
 
-    thrust::device_vector<T> X(size);
-    thrust::copy(&x(0), &x(0)+x.num_rows(), X.begin());
-
-    for (size_t trip = 0; trip < 2; ++trip) {
-
+    for (size_t nthreads = 1; nthreads <= n_parts; nthreads *= 2) {
+#ifdef _OPENMP
+      omp_set_num_threads(nthreads);
+#endif
       t.start();
-      cudaDeviceSynchronize();
       for (size_t i = 0; i < ntrials; ++i) {
-        norm1 = f(X);
-        cudaDeviceSynchronize();
+        norm1 = f(x);
       }
       t.stop();
       ms_times.push_back(t.elapsed());
@@ -133,22 +114,4 @@ void run_cu(Function&& f, size_t N_min, size_t N_max) {
   }
 }
 
-
-
-
-int main(int argc, char* argv[]) {
-  size_t N_min = 1024 * 1024;
-  size_t N_max = 128 * 1024 * 1024;
-
-  if (argc >= 2) {
-    N_min = std::stol(argv[1]);
-  }
-  if (argc >= 3) {
-    N_max = std::stol(argv[2]);
-  }
-
-  run_cu<float>(norm_thrust<float>, N_min, N_max);
-  run_cu<double>(norm_thrust<double>, N_min, N_max);
-
-  return 0;
-}
+#endif    // AMATH583_NORM_UTILS_HPP
