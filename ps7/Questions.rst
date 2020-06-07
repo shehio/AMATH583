@@ -7,9 +7,12 @@ AXPY CUDA
 ---------
 
 * How many more threads are run in version 2 compared to version 1? How much speedup might you expect as a result? How much speedup do you see in your plot?
+There are 256 threads per threadblock in version 2, while there's only ONE thread per threadblock in version 1.
+The speedup that I'm seeing (look at the pdf) is: 230x which is great!
 
 * How many more threads are run in version 3 compared to version 2? How much speedup might you expect as a result? How much speedup do you see in your plot? (Hint: Is the speedup a function of the number of threads launched or the number of available cores, or both?)
-
+The thread per block is the same for both versions: v2 and v3. However, the thread blocks in version 3 is a function of the total input N:  int num_blocks = (N + block_size - 1) / block_size;
+The speedup is fascinating in itself, it's around 10x.
 
 * (AMATH 583) The cu_axpy_t also accepts as a second command line argument the size of the blocks to be used. Experiment with different block sizes with, a few different problem sizes (around :math:`2^{24}` plus or minus).  What block size seems to give the best performance?  Are there any aspects of the GPU as reported in deviceQuery that might point to why this would make sense?
 
@@ -114,6 +117,29 @@ Double
     33554432      1.3841     34.0407     33.5544   3.71015e-08   3.71015e-08
     67108864     1.40542     36.2751     36.2751   2.39604e-08   2.39604e-08
    134217728     1.41626     37.5232     37.5232   1.08505e-09   1.08505e-09
+
+
+Float      
+           N  Sequential       First      Second       First      Second
+     1048576     1.75801     6.13161     6.13161    2.7595e-08    2.7595e-08
+     2097152     1.52348     11.2314     11.2314   4.51044e-08   4.51044e-08
+     4194304     1.39334      18.952     19.3096   2.15465e-08   2.15465e-08
+     8388608      1.3981     28.3399     29.9593   3.51608e-08   3.51608e-08
+    16777216      1.3892     35.7547     41.1517   4.24208e-08   4.24208e-08
+    33554432     1.39313     35.0569     51.0611   8.84264e-09   8.84264e-09
+    67108864     1.40175     31.2134     63.9132   2.65331e-09   2.65331e-09
+   134217728     1.41339     28.8402     72.7013   7.77251e-08   7.77251e-08
+
+Double     
+           N  Sequential       First      Second       First      Second
+     1048576     1.76418       6.405       6.405   2.09287e-08   2.09287e-08
+     2097152      1.6096     10.9873     10.9873   2.38849e-08   2.38849e-08
+     4194304     1.41257     16.9159     16.6408   2.78014e-08   2.78014e-08
+     8388608      1.4056     23.8313     24.1052   2.83637e-08   2.83637e-08
+    16777216     1.39363     29.4735     29.8772   3.67339e-09   3.67339e-09
+    33554432     1.39395     33.5544     34.0407   3.71015e-08   3.71015e-08
+    67108864     1.39883     35.7914     36.2751   2.39604e-08   2.39604e-08
+   134217728     1.40147     37.1241     37.1241   1.08505e-09   1.08505e-09
 
 * Consider just the Second column for single and double.  Why might there be a difference in performance between the two?
 
