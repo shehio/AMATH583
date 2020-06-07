@@ -15,86 +15,88 @@ The thread per block is the same for both versions: v2 and v3. However, the thre
 The speedup is fascinating in itself, it's around 10x.
 
 * (AMATH 583) The cu_axpy_t also accepts as a second command line argument the size of the blocks to be used. Experiment with different block sizes with, a few different problem sizes (around :math:`2^{24}` plus or minus).  What block size seems to give the best performance?  Are there any aspects of the GPU as reported in deviceQuery that might point to why this would make sense?
+The device vector time dips a little for N=25. However, nothing significant for all other aspects. I'm not sure what device property could indicate which block size should be used.
+
+(13) Multiprocessors, (192) CUDA Cores/MP:     2496 CUDA Cores
+Maximum number of threads per multiprocessor:  2048
+Maximum number of threads per block:           1024
+ 
+yassers@ip-172-31-41-96:~/AMATH583/ps7/axpy_cuda$ ./cu_axpy_t.exe 23
+# elapsed time [host_vector]: 46 ms
+# elapsed time [device_vector]: 191 ms
+# elapsed time [copy]: 10 ms
+# elapsed time [thrust_call]: 518 ms
+# gflops / sec [ madd ]: 25.9108
+# elapsed time [copy_back]: 3 ms
+
+yassers@ip-172-31-41-96:~/AMATH583/ps7/axpy_cuda$ ./cu_axpy_t.exe 24
+# elapsed time [host_vector]: 92 ms
+# elapsed time [device_vector]: 185 ms
+# elapsed time [copy]: 22 ms
+# elapsed time [thrust_call]: 267 ms
+# gflops / sec [ madd ]: 25.1344
+# elapsed time [copy_back]: 7 ms
+
+yassers@ip-172-31-41-96:~/AMATH583/ps7/axpy_cuda$ ./cu_axpy_t.exe 25
+# elapsed time [host_vector]: 185 ms
+# elapsed time [device_vector]: 168 ms
+# elapsed time [copy]: 45 ms
+# elapsed time [thrust_call]: 508 ms
+# gflops / sec [ madd ]: 26.4208
+# elapsed time [copy_back]: 11 ms
+
+yassers@ip-172-31-41-96:~/AMATH583/ps7/axpy_cuda$ ./cu_axpy_t.exe 26
+# elapsed time [host_vector]: 372 ms
+# elapsed time [device_vector]: 171 ms
+# elapsed time [copy]: 87 ms
+# elapsed time [thrust_call]: 507 ms
+# gflops / sec [ madd ]: 26.4729
+# elapsed time [copy_back]: 23 ms
+yassers@ip-172-31-41-96:~/AMATH583/ps7/axpy_cuda$ ./cu_axpy_t.exe 27
+# elapsed time [host_vector]: 740 ms
+# elapsed time [device_vector]: 193 ms
+# elapsed time [copy]: 178 ms
+# elapsed time [thrust_call]: 506 ms
+# gflops / sec [ madd ]: 26.5252
+# elapsed time [copy_back]: 46 ms
+
 
 
 nvprof
 ------
 
 * Looking at some of the metrics reported by nvprof, how do metrics such as occupancy and efficiency compare to the ratio of threads launched between versions 1, 2, and 3?
+Looking at the average achieved occupancy, it's 1.5% for v1, 11% for v2 and 63% for v3. So, v3 certainly dominates that aspect.
+Now, looking at the average global memory load efficiency, it's 12.5% for v1, and 91.67% for both v2 and v3. So, no gains coming from v3 over v2.
 
 Invocations                               Metric Name                        Metric Description         Min         Max         Avg
-Device "Tesla K80 (0)"
-    Kernel: madd(int, float, float*, float*)
           6                        achieved_occupancy                        Achieved Occupancy    0.015616    0.015625    0.015623
-          6                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          6                      dram_read_throughput             Device Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          6                  gld_requested_throughput          Requested Global Load Throughput  4.5038MB/s  19.270MB/s  19.214MB/s
-          6                            gst_throughput                   Global Store Throughput  18.015MB/s  77.082MB/s  76.855MB/s
           6                            gst_efficiency            Global Memory Store Efficiency      12.50%      12.50%      12.50%
           6                             sm_efficiency                   Multiprocessor Activity       2.27%       7.65%       6.74%
-          6                         shared_efficiency                  Shared Memory Efficiency       0.00%       0.00%       0.00%
           6                            gld_efficiency             Global Memory Load Efficiency      12.50%      12.50%      12.50%
 
-Invocations                               Metric Name                        Metric Description         Min         Max         AvgDevice "Tesla K80 (0)"    Kernel: madd(int, float, float*, float*)
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
           6                        achieved_occupancy                        Achieved Occupancy    0.087804    0.124812    0.118601
-          6                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          6                      dram_read_throughput             Device Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          6                  gld_requested_throughput          Requested Global Load Throughput  5.5934MB/s  3.6458GB/s  3.6093GB/s
-          6                            gst_throughput                   Global Store Throughput  5.5934MB/s  1.8229GB/s  1.8047GB/s
           6                            gst_efficiency            Global Memory Store Efficiency      50.00%     100.00%      91.67%
           6                             sm_efficiency                   Multiprocessor Activity       1.43%       7.25%       6.28%
-          6                         shared_efficiency                  Shared Memory Efficiency       0.00%       0.00%       0.00%
           6                            gld_efficiency             Global Memory Load Efficiency      50.00%     100.00%      91.67%
 
 Invocations                               Metric Name                        Metric Description         Min         Max         Avg
-Device "Tesla K80 (0)"
-    Kernel: madd(int, float, float*, float*)
           6                        achieved_occupancy                        Achieved Occupancy    0.090628    0.764906    0.638949
-          6                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          6                      dram_read_throughput             Device Memory Read Throughput  0.00000B/s  10.274GB/s  3.3211GB/s
-          6                  gld_requested_throughput          Requested Global Load Throughput  5.4652MB/s  55.791GB/s  48.749GB/s
-          6                            gst_throughput                   Global Store Throughput  5.4652MB/s  27.895GB/s  24.375GB/s
           6                            gst_efficiency            Global Memory Store Efficiency      50.00%     100.00%      91.67%
           6                             sm_efficiency                   Multiprocessor Activity       1.46%      38.99%      31.23%
-          6                         shared_efficiency                  Shared Memory Efficiency       0.00%       0.00%       0.00%
           6                            gld_efficiency             Global Memory Load Efficiency      50.00%     100.00%      91.67%
-
-Invocations                               Metric Name                        Metric Description         Min         Max         Avg
-Device "Tesla K80 (0)"
-    Kernel: _ZN6thrust8cuda_cub4core13_kernel_agentINS0_14__parallel_for16ParallelForAgentINS0_11__transform18binary_transform_fINS_6detail15normal_iteratorINS_10device_ptrIfEEEESB_SB_NS5_14no_stencil_tagEZ4mainEUlffE_NS5_21always_true_predicateEEElEESF_lEEvT0_T1_
-          5                        achieved_occupancy                        Achieved Occupancy    0.725889    0.757126    0.742563
-          5                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          5                      dram_read_throughput             Device Memory Read Throughput  1.4144GB/s  8.8445GB/s  4.7792GB/s
-          5                  gld_requested_throughput          Requested Global Load Throughput  50.359GB/s  54.789GB/s  52.454GB/s
-          5                            gst_throughput                   Global Store Throughput  25.180GB/s  27.395GB/s  26.227GB/s
-          5                            gst_efficiency            Global Memory Store Efficiency     100.00%     100.00%     100.00%
-          5                             sm_efficiency                   Multiprocessor Activity      37.19%      43.57%      40.86%
-          5                         shared_efficiency                  Shared Memory Efficiency       0.00%       0.00%       0.00%
-          5                            gld_efficiency             Global Memory Load Efficiency     100.00%     100.00%     100.00%
-    Kernel: _ZN6thrust8cuda_cub4core13_kernel_agentINS0_14__parallel_for16ParallelForAgentINS0_11__transform18binary_transform_fINS_6detail15normal_iteratorINS_10device_ptrIfEEEESB_SB_NS5_14no_stencil_tagEZ14find_10ms_sizevEUlffE_NS5_21always_true_predicateEEElEESF_lEEvT0_T1_
-          1                        achieved_occupancy                        Achieved Occupancy    0.086217    0.086217    0.086217
-          1                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          1                      dram_read_throughput             Device Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          1                  gld_requested_throughput          Requested Global Load Throughput  5.2835MB/s  5.2835MB/s  5.2833MB/s
-          1                            gst_throughput                   Global Store Throughput  5.2835MB/s  5.2835MB/s  5.2833MB/s
-          1                            gst_efficiency            Global Memory Store Efficiency      50.00%      50.00%      50.00%
-          1                             sm_efficiency                   Multiprocessor Activity       1.81%       1.81%       1.81%
-          1                         shared_efficiency                  Shared Memory Efficiency       0.00%       0.00%       0.00%
-          1                            gld_efficiency             Global Memory Load Efficiency      50.00%      50.00%      50.00%
-    Kernel: void thrust::cuda_cub::core::_kernel_agent<thrust::cuda_cub::__parallel_for::ParallelForAgent<thrust::cuda_cub::__uninitialized_fill::functor<thrust::device_ptr<float>, float>, unsigned long>, thrust::cuda_cub::__uninitialized_fill::functor<thrust::device_ptr<float>, float>, unsigned long>(thrust::device_ptr<float>, float)
-          4                        achieved_occupancy                        Achieved Occupancy    0.109904    0.756937    0.431581
-          4                    sysmem_read_throughput             System Memory Read Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          4                      dram_read_throughput             Device Memory Read Throughput  0.00000B/s  33.758MB/s  9.7097MB/s
-          4                  gld_requested_throughput          Requested Global Load Throughput  0.00000B/s  0.00000B/s  0.00000B/s
-          4                            gst_throughput                   Global Store Throughput  5.5366MB/s  34.679GB/s  19.422GB/s
-          4                            gst_efficiency            Global Memory Store Efficiency      50.00%     100.00%      75.00%
-          4                             sm_efficiency                   Multiprocessor Activity       1.06%      30.17%      15.69%
-          4                         shared_efficiency                  Shared Memory Efficiency       0.00%       0.00%       0.00%
-          4                            gld_efficiency             Global Memory Load Efficiency       0.00%       0.00%       0.00%
 
 
 norm
 ----
+* Consider just the Second column for single and double.  Why might there be a difference in performance between the two?
+copying and stuff like that.
+
+* Consider just the First and Second columns for single precision.  Why might there be a difference in performance between the two?
+(Hint:  What data structure are we starting with in the driver?  Our own ``Vector`` type.  What are its element types as compared to what we are sending to the GPU?)
+
+* Compare and contrast strided partitioning for task-based parallelism (e.g., OpenMP or C++ tasks) with strided partitioning for GPU.  Why is it bad in the former case but good (if it is) in the latter case?
 
 Float      
            N  Sequential       First      Second       First      Second
@@ -141,20 +143,10 @@ Double
     67108864     1.39883     35.7914     36.2751   2.39604e-08   2.39604e-08
    134217728     1.40147     37.1241     37.1241   1.08505e-09   1.08505e-09
 
-* Consider just the Second column for single and double.  Why might there be a difference in performance between the two?
-
-* Consider just the First and Second columns for single precision.  Why might there be a difference in performance between the two?
-(Hint:  What data structure are we starting with in the driver?  Our own ``Vector`` type.  What are its element types as compared to what we are sending to the GPU?)
-
-* Compare and contrast strided partitioning for task-based parallelism (e.g., OpenMP or C++ tasks) with strided partitioning for GPU.  Why is it bad in the former case but good (if it is) in the latter case?
-
 
 About PS7
 ---------
 
-* The most important thing I learned from this assignment was ...
+* The most important thing I learned from this assignment was: writing my first CUDA program! This was awesome.
 
-
-* One thing I am still not clear on is ...
-
-copying and stuff like that.
+* One thing I am still not clear on is: I won't be able to optimize code for specific GPU architecture. I'm not sure how threadblocks and multiprocessors fit in one unifying framework.
