@@ -131,3 +131,4 @@ About PS7
 
 * One thing I am still not clear on is ...
 
+copying and stuff like that.

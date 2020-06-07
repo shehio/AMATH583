@@ -30,8 +30,7 @@
 
 template<typename T>
 T norm_thrust(const thrust::device_vector<T>& x) {
-  // Write me
-  thrust::square<float>        unary_op;
+  thrust::square<float> unary_op;
   thrust::plus<float> binary_op;
   T init = 0;
 
