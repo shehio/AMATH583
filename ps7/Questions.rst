@@ -91,12 +91,14 @@ Invocations                               Metric Name                        Met
 norm
 ----
 * Consider just the Second column for single and double.  Why might there be a difference in performance between the two?
-copying and stuff like that.
+The guidance (from the docs) when using CUDA is to maximize the computation and minimizing the data transfer (much like in any computation model). So, copying doubles is double the work. We can see that the speed-up from double to float is 2x. I might also add that the computation cost is negligible compared to readying the data.
 
 * Consider just the First and Second columns for single precision.  Why might there be a difference in performance between the two?
 (Hint:  What data structure are we starting with in the driver?  Our own ``Vector`` type.  What are its element types as compared to what we are sending to the GPU?)
+The vector seems to be using the type double regardless (it's not a template class). So, maybe there's "type-casting" happening that is meddling with the performance of the first.
 
 * Compare and contrast strided partitioning for task-based parallelism (e.g., OpenMP or C++ tasks) with strided partitioning for GPU.  Why is it bad in the former case but good (if it is) in the latter case?
+The limited memory of the cache of the CPU forces the CPU to keep shuffling memory blocks due to the page faults. The CPU mostly does memory management and NOT useful computation. We don't hit this problem on a GPU due to the fact that a GPU has more memory and is optimized for computations like that.
 
 Float      
            N  Sequential       First      Second       First      Second
@@ -119,30 +121,6 @@ Double
     33554432      1.3841     34.0407     33.5544   3.71015e-08   3.71015e-08
     67108864     1.40542     36.2751     36.2751   2.39604e-08   2.39604e-08
    134217728     1.41626     37.5232     37.5232   1.08505e-09   1.08505e-09
-
-
-Float      
-           N  Sequential       First      Second       First      Second
-     1048576     1.75801     6.13161     6.13161    2.7595e-08    2.7595e-08
-     2097152     1.52348     11.2314     11.2314   4.51044e-08   4.51044e-08
-     4194304     1.39334      18.952     19.3096   2.15465e-08   2.15465e-08
-     8388608      1.3981     28.3399     29.9593   3.51608e-08   3.51608e-08
-    16777216      1.3892     35.7547     41.1517   4.24208e-08   4.24208e-08
-    33554432     1.39313     35.0569     51.0611   8.84264e-09   8.84264e-09
-    67108864     1.40175     31.2134     63.9132   2.65331e-09   2.65331e-09
-   134217728     1.41339     28.8402     72.7013   7.77251e-08   7.77251e-08
-
-Double     
-           N  Sequential       First      Second       First      Second
-     1048576     1.76418       6.405       6.405   2.09287e-08   2.09287e-08
-     2097152      1.6096     10.9873     10.9873   2.38849e-08   2.38849e-08
-     4194304     1.41257     16.9159     16.6408   2.78014e-08   2.78014e-08
-     8388608      1.4056     23.8313     24.1052   2.83637e-08   2.83637e-08
-    16777216     1.39363     29.4735     29.8772   3.67339e-09   3.67339e-09
-    33554432     1.39395     33.5544     34.0407   3.71015e-08   3.71015e-08
-    67108864     1.39883     35.7914     36.2751   2.39604e-08   2.39604e-08
-   134217728     1.40147     37.1241     37.1241   1.08505e-09   1.08505e-09
-
 
 About PS7
 ---------
