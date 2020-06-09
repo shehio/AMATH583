@@ -22,22 +22,25 @@ int main(int argc, char* argv[]) {
   int myrank = MPI::COMM_WORLD.Get_rank();
   int mysize = MPI::COMM_WORLD.Get_size();
 
+  std::cout << "my rank: " << myrank << std::endl;
+  std::cout << "my size: " << mysize << std::endl;
+
   while (rounds--) {
     if (0 == myrank) {
-      int left  = 1;  // Fix me
-      int right = 1;  // And m
-      std::cout << myrank << ": sending  " << token << std::endl;
+      int left  = (myrank + 1) % mysize;  // Fix me
+      int right = (myrank - 1) % mysize;  // And me
+      std::cout << myrank << ": sending token: " << token << std::endl;
       MPI::COMM_WORLD.Send(&token, 1, MPI::INT, left, 321);
       MPI::COMM_WORLD.Recv(&token, 1, MPI::INT, right, 321);
-      std::cout << myrank << ": received " << token << std::endl;
+      std::cout << myrank << ": received token: " << token << std::endl;
       ++token;
     } else {
-      int left  = 0;  // Fix me
-      int right = 0;  // And me
+      int left  = (myrank - 1) % mysize;  // Fix me
+      int right = (myrank + 1) % mysize;  // And me
       MPI::COMM_WORLD.Recv(&token, 1, MPI::INT, left, 321);
-      std::cout << myrank << ": received " << token << std::endl;
+      std::cout << myrank << ": received token: " << token << std::endl;
       ++token;
-      std::cout << myrank << ": sending  " << token << std::endl;
+      std::cout << myrank << ": sending token: " << token << std::endl;
       MPI::COMM_WORLD.Send(&token, 1, MPI::INT, right, 321);
     }
   }

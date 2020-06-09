@@ -9,3 +9,4 @@ ps5b/instrumentscl*/
 *.mtx
 ps7b/axpy_cuda/*.txt
 ps7/axpy_cuda/*.txt
+*.out

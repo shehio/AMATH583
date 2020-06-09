@@ -23,6 +23,8 @@ int main(int argc, char* argv[]) {
   int myrank = MPI::COMM_WORLD.Get_rank();
   int mysize = MPI::COMM_WORLD.Get_size();
 
+  std::cout << "my rank: " << myrank << std::endl;
+
   while (rounds--) {
     if (0 == myrank) {
       std::cout << myrank << ": sending  " << token << std::endl;
