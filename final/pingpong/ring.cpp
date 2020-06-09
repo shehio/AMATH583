@@ -27,16 +27,16 @@ int main(int argc, char* argv[]) {
 
   while (rounds--) {
     if (0 == myrank) {
-      int left  = (myrank + 1) % mysize;  // Fix me
-      int right = (myrank - 1) % mysize;  // And me
+      int left  = (myrank + 1) % mysize;
+      int right = (myrank - 1) % mysize;
       std::cout << myrank << ": sending token: " << token << std::endl;
       MPI::COMM_WORLD.Send(&token, 1, MPI::INT, left, 321);
       MPI::COMM_WORLD.Recv(&token, 1, MPI::INT, right, 321);
       std::cout << myrank << ": received token: " << token << std::endl;
       ++token;
     } else {
-      int left  = (myrank - 1) % mysize;  // Fix me
-      int right = (myrank + 1) % mysize;  // And me
+      int left  = (myrank - 1) % mysize;
+      int right = (myrank + 1) % mysize;
       MPI::COMM_WORLD.Recv(&token, 1, MPI::INT, left, 321);
       std::cout << myrank << ": received token: " << token << std::endl;
       ++token;

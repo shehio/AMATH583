@@ -24,7 +24,13 @@ double mpi_norm(const Vector& local_x) {
   // Write me -- compute local sum of squares and then REDUCE 
   // ALL ranks should get the same global_rho  (that was a hint)
 
+  double local_rho = 0.0;
+  for(size_t i = 0; i < local_x.num_rows(); i++)
+  {
+    local_rho += local_x(i) * local_x(i);
+  }
 
+  MPI::COMM_WORLD.Allreduce(&local_rho, &global_rho, 1, MPI::DOUBLE, MPI::SUM);
   return std::sqrt(global_rho);
 }
 
@@ -61,6 +67,8 @@ int main(int argc, char* argv[]) {
   size_t myrank = MPI::COMM_WORLD.Get_rank();
   size_t mysize = MPI::COMM_WORLD.Get_size();
 
+  std::cout << "my rank: " << myrank << std::endl;
+
   size_t exponent           = 24;
   size_t num_trips          = 32;
   size_t num_elements 	    = 0;
@@ -75,29 +83,26 @@ int main(int argc, char* argv[]) {
     size_t base_size = find_10ms_size(two_norm<Vector>);
     num_trips = num_trials(base_size, num_elements);
 
-    MPI::COMM_WORLD.Bcast(&num_elements, 1, MPI::DOUBLE, 0);
+    MPI::COMM_WORLD.Bcast(&num_elements, 1, MPI::UNSIGNED_LONG, 0);
     MPI::COMM_WORLD.Bcast(&num_trips, 1, MPI::UNSIGNED_LONG, 0);
 
   } else {
-    MPI::COMM_WORLD.Bcast(&num_elements, 1, MPI::DOUBLE, 0);
+    MPI::COMM_WORLD.Bcast(&num_elements, 1, MPI::UNSIGNED_LONG, 0);
     MPI::COMM_WORLD.Bcast(&num_trips, 1, MPI::UNSIGNED_LONG, 0);
   }
 
   Vector local_x(num_elements);
 
-  // 
-  // Write me -- the contents of vector x should be randomized and scattered to all ranks
-  //
   double rho = 0.0;
   if (myrank == 0) {
     Vector x(num_elements * mysize);   // Create original vector on just root node
     randomize(x, 10.0, 0.0);
-
     rho = std::sqrt(std::inner_product(&x(0), &x(0)+x.num_rows(), &x(0), 0.0)); // get sequential result
 
-
+    // send the vector to each of them?
+    MPI::COMM_WORLD.Scatter(&x(0), num_elements, MPI::DOUBLE, &local_x(0), num_elements, MPI::DOUBLE, 0);
   } else {
-
+    MPI::COMM_WORLD.Scatter(nullptr, num_elements, MPI::DOUBLE, &local_x(0), num_elements, MPI::DOUBLE, 0);
   }
 
   double sigma = 0.0;
