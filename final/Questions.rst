@@ -25,6 +25,7 @@ Grid
 * For strong scaling, at what problem size (and what number of nodes) does
   parallelization stop being useful?
 
+
 Useful commands:
 make pingpong.exe && srun -n 2 mpirun -np 2 pingpong.exe 1
 make pingpong.exe && srun -N 2 -n 4 pingpong.exe 1
