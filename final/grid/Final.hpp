@@ -40,16 +40,17 @@ size_t jacobi(const mpiStencil& A, Grid& x, const Grid& b, size_t maxiter, doubl
 
   for (size_t iter = 0; iter < maxiter; ++iter) {
 
-    double rho = 0;
+    double partial_rho = 0;
 
     for (size_t i = 1; i < x.num_x() - 1; ++i) {
       for (size_t j = 1; j < x.num_y() - 1; ++j) {
-	y(i, j) = (x(i - 1, j) + x(i + 1, j) + x(i, j - 1) + x(i, j + 1)) / 4.0;
-	rho += (y(i, j) - x(i, j)) * (y(i, j) - x(i, j));
+        y(i, j) = (x(i - 1, j) + x(i + 1, j) + x(i, j - 1) + x(i, j + 1)) / 4.0;
+        partial_rho += (y(i, j) - x(i, j)) * (y(i, j) - x(i, j));
       }
     }
 
-    // Parallelize me
+    double rho = 0;
+    MPI::COMM_WORLD.Allreduce(&partial_rho, &rho, 1, MPI::DOUBLE, MPI::SUM);
     std::cout << "||r|| = " << std::sqrt(rho) << std::endl;
     if (std::sqrt(rho) < tol) return iter;
     swap(x, y);
@@ -59,6 +60,18 @@ size_t jacobi(const mpiStencil& A, Grid& x, const Grid& b, size_t maxiter, doubl
     size_t mysize = MPI::COMM_WORLD.Get_size();
 
     // Perform halo exchange (write me)
+    if (myrank != 0)
+    {
+      MPI::Request r_req_n = MPI::COMM_WORLD.Irecv(&x(0, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
+      MPI::Request s_req_n = MPI::COMM_WORLD.Isend(&x(1, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
+    }
+    
+    if (myrank != mysize - 1)
+    {
+      MPI::Request r_req_s = MPI::COMM_WORLD.Irecv(&x(x.num_x() - 1, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321); 
+      MPI::Request s_req_s = MPI::COMM_WORLD.Isend(&x(x.num_x() - 2, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321);
+    }
+
   }
     
   return maxiter;
