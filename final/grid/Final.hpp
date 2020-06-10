@@ -23,7 +23,30 @@ double mpi_dot(const Grid& X, const Grid& Y) {
   double sum = 0.0;
   double local_sum = 0.0;
 
-  for (size_t i = 0; i < X.num_x(); ++i) {
+  size_t first = 0, last = 0;
+
+  size_t myrank = MPI::COMM_WORLD.Get_rank();
+  size_t mysize = MPI::COMM_WORLD.Get_size();
+
+  if (myrank == 0)
+  {
+    first = 0;
+  }
+  else
+  {
+    first = 1;
+  }
+
+  if (myrank == mysize - 1)
+  {
+    last = X.num_x();
+  }
+  else
+  {
+    last = X.num_x() - 1;
+  }
+
+  for (size_t i = first; i < last; ++i) {
     for (size_t j = 0; j < X.num_y(); ++j) {
       local_sum += X(i, j) * Y(i, j);
     }
@@ -35,7 +58,6 @@ double mpi_dot(const Grid& X, const Grid& Y) {
 
 
 size_t jacobi(const mpiStencil& A, Grid& x, const Grid& b, size_t maxiter, double tol) {
-
   Grid y = b;
   swap(x, y);
 
@@ -74,7 +96,7 @@ size_t ir(const mpiStencil& A, Grid& x, const Grid& b, size_t max_iter, double t
   for (size_t iter = 0; iter < max_iter; ++iter) {
     Grid r = b - A*x;
 
-    double sigma = dot(r, r);
+    double sigma = mpi_dot(r, r);
 
     if (MPI::COMM_WORLD.Get_rank() == 0) 
       std::cout << "||r|| = " << std::sqrt(sigma) << std::endl;
@@ -92,7 +114,7 @@ size_t cg(const mpiStencil& A, Grid& x, const Grid& b, size_t max_iter, double t
   size_t myrank = MPI::COMM_WORLD.Get_rank();
 
   Grid r = b - A*x, p(b);
-  double rho = dot(r, r), rho_1 = 0.0;
+  double rho = mpi_dot(r, r), rho_1 = 0.0;
 
   for (size_t iter = 0; iter < max_iter; ++iter) {
     if (0 == myrank) {
@@ -108,13 +130,13 @@ size_t cg(const mpiStencil& A, Grid& x, const Grid& b, size_t max_iter, double t
     
     Grid q = A*p;
 
-    double alpha = rho / dot(p, q);
+    double alpha = rho / mpi_dot(p, q);
     
     x += alpha * p;
     
     rho_1 = rho;
     r -= alpha * q;
-    rho = dot(r, r);
+    rho = mpi_dot(r, r);
 
     if (rho < tol) return iter;
   }
