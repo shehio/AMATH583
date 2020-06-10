@@ -59,36 +59,12 @@ size_t jacobi(const mpiStencil& A, Grid& x, const Grid& b, size_t maxiter, doubl
     size_t myrank = MPI::COMM_WORLD.Get_rank();
     size_t mysize = MPI::COMM_WORLD.Get_size();
 
-    // Perform halo exchange (write me)
-    if (myrank != 0)
-    {
-      MPI::Request r_req_n = MPI::COMM_WORLD.Irecv(&x(0, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
-      MPI::Request s_req_n = MPI::COMM_WORLD.Isend(&x(1, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
-
-      r_req_n.Wait();
-      s_req_n.Wait();
-    }
-    
-    if (myrank != mysize - 1)
-    {
-      MPI::Request r_req_s = MPI::COMM_WORLD.Irecv(&x(x.num_x() - 1, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321); 
-      MPI::Request s_req_s = MPI::COMM_WORLD.Isend(&x(x.num_x() - 2, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321);
-
-      r_req_s.Wait();
-      r_req_s.Wait();
-    }
-
-    // if (myrank != 0)
-    // {
-      
-    // }
-    
-    // if (myrank != mysize - 1)
-    // {
-      
-    // }
+    size_t north = (myrank == 0 ? MPI::PROC_NULL : myrank - 1);
+    size_t south = (myrank == mysize - 1 ? MPI::PROC_NULL : myrank + 1);
+    MPI::COMM_WORLD.Sendrecv(&x(1, 0), x.num_y(), MPI::DOUBLE, north, 322, &x(0, 0), x.num_y(), MPI::DOUBLE, north, 321);
+    MPI::COMM_WORLD.Sendrecv(&x(x.num_x() - 2, 0), x.num_y(), MPI::DOUBLE, south, 321, &x(x.num_x() - 1, 0), x.num_y(), MPI::DOUBLE, south, 322);
   }
-    
+  
   return maxiter;
 }
 
