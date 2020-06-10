@@ -21,14 +21,15 @@
 
 double mpi_dot(const Grid& X, const Grid& Y) {
   double sum = 0.0;
+  double local_sum = 0.0;
 
-  // Parallelize me
   for (size_t i = 0; i < X.num_x(); ++i) {
     for (size_t j = 0; j < X.num_y(); ++j) {
-      sum += X(i, j) * Y(i, j);
+      local_sum += X(i, j) * Y(i, j);
     }
   }
 
+  MPI::COMM_WORLD.Allreduce(&local_sum, &sum, 1, MPI::DOUBLE, MPI::SUM);
   return sum;
 }
 
