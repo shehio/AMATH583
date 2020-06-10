@@ -1,0 +1,7 @@
+31
+size	procs	time	ms_per	gflops
+31	1			
+31	2			
+31	4			
+31	8			
+31	16			

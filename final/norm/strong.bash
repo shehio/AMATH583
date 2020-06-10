@@ -4,7 +4,7 @@ echo "Strong scaling tests"
 make clean
 make mpi_norm.exe
 
-for size in 20 21 22 23 24 25 26 27 # 28
+for size in 30 31 32
 do
     
     /bin/rm -f strong${size}.out.txt
