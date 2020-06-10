@@ -64,14 +64,29 @@ size_t jacobi(const mpiStencil& A, Grid& x, const Grid& b, size_t maxiter, doubl
     {
       MPI::Request r_req_n = MPI::COMM_WORLD.Irecv(&x(0, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
       MPI::Request s_req_n = MPI::COMM_WORLD.Isend(&x(1, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
+
+      r_req_n.Wait();
+      s_req_n.Wait();
     }
     
     if (myrank != mysize - 1)
     {
       MPI::Request r_req_s = MPI::COMM_WORLD.Irecv(&x(x.num_x() - 1, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321); 
       MPI::Request s_req_s = MPI::COMM_WORLD.Isend(&x(x.num_x() - 2, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321);
+
+      r_req_s.Wait();
+      r_req_s.Wait();
     }
 
+    // if (myrank != 0)
+    // {
+      
+    // }
+    
+    // if (myrank != mysize - 1)
+    // {
+      
+    // }
   }
     
   return maxiter;
