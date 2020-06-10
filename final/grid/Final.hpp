@@ -55,7 +55,6 @@ size_t jacobi(const mpiStencil& A, Grid& x, const Grid& b, size_t maxiter, doubl
     if (std::sqrt(rho) < tol) return iter;
     swap(x, y);
 
-
     size_t myrank = MPI::COMM_WORLD.Get_rank();
     size_t mysize = MPI::COMM_WORLD.Get_size();
 

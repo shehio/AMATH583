@@ -23,12 +23,10 @@ Grid mult(const mpiStencil& A, const Grid& x) {
   size_t myrank = MPI::COMM_WORLD.Get_rank();
   size_t mysize = MPI::COMM_WORLD.Get_size();
 
-  // Ghost cell (halo) update goes here
-  MPI::COMM_WORLD.Recv(const_cast<double*>(&x(0, 0)), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
-  MPI::COMM_WORLD.Recv(const_cast<double*>(&x(x.num_x() - 1, 0)), x.num_y(), MPI::DOUBLE, myrank + 1, 321);
-  
-  MPI::COMM_WORLD.Send(&x(1, 0), x.num_y(), MPI::DOUBLE, myrank - 1, 321);
-  MPI::COMM_WORLD.Send(&x(x.num_x() - 2, 0), x.num_y(), MPI::DOUBLE, myrank + 1, 321);
+  size_t north = (myrank == 0 ? MPI::PROC_NULL : myrank - 1);
+  size_t south = (myrank == mysize - 1 ? MPI::PROC_NULL : myrank + 1);
+  MPI::COMM_WORLD.Sendrecv(&x(1, 0), x.num_y(), MPI::DOUBLE, north, 322, const_cast<double*>(&x(0, 0)), x.num_y(), MPI::DOUBLE, north, 321);
+  MPI::COMM_WORLD.Sendrecv(&x(x.num_x() - 2, 0), x.num_y(), MPI::DOUBLE, south, 321, const_cast<double*>(&x(x.num_x() - 1, 0)), x.num_y(), MPI::DOUBLE, south, 322);
 
   // SPMD stencil application
   for (size_t i = 1; i < x.num_x() - 1; ++i) {
