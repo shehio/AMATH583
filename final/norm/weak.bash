@@ -4,7 +4,7 @@ echo "Weak scaling tests"
 make clean
 make mpi_norm.exe
 
-for size in 20 21 22
+for size in 20 21 22 23
 do
 
     /bin/rm -f weak${size}.out.txt
@@ -13,7 +13,7 @@ do
     printf "${size}\n" | tee -a weak${size}.out.txt
     printf "size\tprocs\ttime\tms_per\tgflops\n" | tee -a weak${size}.out.txt
     let "xsize = ${size}"
-    for tasks in 1 2 4 8 16 # 32
+    for tasks in 1 2 4 8 16 32
     do
 	let "nodes = ${tasks}/2"
 	if [ $nodes == 0 ]
@@ -21,7 +21,6 @@ do
 	    nodes=1
 	fi
 	echo nodes $nodes
-	let "xsize = ${size} * ${tasks}"
 	
 	job=`sbatch -N ${nodes} --ntasks ${tasks} mpi_norm.bash $xsize | awk '{ print $4 }'`
 	
@@ -44,5 +43,5 @@ do
     
 done
 
-python3 plot.py weak128.out.txt weak256.out.txt weak512.out.txt
+python3 plot.py weak20.out.txt weak21.out.txt weak22.out.txt weak23.out.txt
 mv time.pdf weak.pdf

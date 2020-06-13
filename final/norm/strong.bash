@@ -4,7 +4,7 @@ echo "Strong scaling tests"
 make clean
 make mpi_norm.exe
 
-for size in 30 31 32
+for size in 20 21 22 23 24 25 26 27 28
 do
     
     /bin/rm -f strong${size}.out.txt
@@ -13,7 +13,7 @@ do
     printf "${size}\n" | tee -a strong${size}.out.txt
     printf "size\tprocs\ttime\tms_per\tgflops\n" | tee -a strong${size}.out.txt
     
-    for tasks in 1 2 4 8 16 # 32 
+    for tasks in 1 2 4 8 16 32 
     do
 	let "nodes = ${tasks}/2"
 	if [ $nodes == 0 ]
@@ -38,5 +38,5 @@ do
     done
 done
 
-#python3 plot.py strong1024.out.txt strong2048.out.txt strong4096.out.txt
-#mv time.pdf strong.pdf
+python3 plot.py strong20.out.txt strong21.out.txt strong22.out.txt strong23.out.txt strong24.out.txt strong25.out.txt strong26.out.txt  strong27.out.txt strong28.out.txt 
+mv time.pdf strong.pdf
